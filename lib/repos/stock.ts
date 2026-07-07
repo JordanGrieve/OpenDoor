@@ -24,15 +24,26 @@ export interface ShoppingLine {
  * toBuy = required − current stock (never below zero).
  */
 export async function getShoppingList(): Promise<{ category: string; lines: ShoppingLine[] }[]> {
+  // Resolve each outstanding order line to an effective variant: the one it
+  // was ordered with, or (for single-variant products bought at the base
+  // price with no variant) the product's default variant — so recipes link.
   const rows = (await sql`
+    WITH oi_resolved AS (
+      SELECT oi.quantity,
+             COALESCE(
+               oi.variant_id,
+               (SELECT v.id FROM product_variants v WHERE v.product_id = oi.product_id ORDER BY v.sort_order LIMIT 1)
+             ) AS variant_id
+      FROM order_items oi
+      JOIN orders o ON o.id = oi.order_id AND o.status IN ('confirmed', 'ready')
+    )
     SELECT i.id, i.name, i.unit, i.category, i.stock,
-           COALESCE(SUM(oi.quantity * ri.amount), 0) AS required
+           COALESCE(SUM(r.quantity * ri.amount), 0) AS required
     FROM ingredients i
     LEFT JOIN recipe_items ri ON ri.ingredient_id = i.id
-    LEFT JOIN order_items oi ON oi.variant_id = ri.variant_id
-    LEFT JOIN orders o ON o.id = oi.order_id AND o.status IN ('confirmed', 'ready')
+    LEFT JOIN oi_resolved r ON r.variant_id = ri.variant_id
     GROUP BY i.id
-    HAVING COALESCE(SUM(oi.quantity * ri.amount), 0) > 0
+    HAVING COALESCE(SUM(r.quantity * ri.amount), 0) > 0
     ORDER BY i.category, i.name
   `) as Row[];
 

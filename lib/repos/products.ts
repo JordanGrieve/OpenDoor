@@ -14,8 +14,22 @@ import type {
 
 type Row = Record<string, unknown>;
 
+/** Coerce a JSON-agg column to an array whether the driver returns an object or a string. */
+function asArray(raw: unknown): Row[] {
+  if (Array.isArray(raw)) return raw as Row[];
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
 function mapAllergens(raw: unknown): Allergen[] {
-  const arr = Array.isArray(raw) ? raw : [];
+  const arr = asArray(raw);
   return arr.map((a: Row) => ({
     id: Number(a.id),
     slug: String(a.slug),
@@ -24,7 +38,7 @@ function mapAllergens(raw: unknown): Allergen[] {
 }
 
 function mapVariants(raw: unknown, productId: number): ProductVariant[] {
-  const arr = Array.isArray(raw) ? raw : [];
+  const arr = asArray(raw);
   return arr
     .map((v: Row) => ({
       id: Number(v.id),
@@ -38,7 +52,7 @@ function mapVariants(raw: unknown, productId: number): ProductVariant[] {
 }
 
 function mapImages(raw: unknown, productId: number): ProductImage[] {
-  const arr = Array.isArray(raw) ? raw : [];
+  const arr = asArray(raw);
   return arr
     .map((i: Row) => ({
       id: Number(i.id),

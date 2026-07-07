@@ -28,14 +28,22 @@ The `Product` type in `lib/types.ts` is the single source of truth for products 
 
 ## Local setup
 
+Zero-config — runs with **no database or keys** thanks to an embedded Postgres fallback:
+
 ```bash
 npm install
-cp .env.example .env.local   # fill in what you have
-npm run db:reset             # migrate + seed (needs DATABASE_URL)
-npm run dev
+npm run dev        # open http://localhost:3000
 ```
 
-Every external service degrades gracefully when its keys are absent: calls log the intended action instead of failing, so the app runs locally with only `DATABASE_URL`.
+When `DATABASE_URL` is not set, the app boots an in-process **PGlite** (WASM Postgres), auto-creates the schema and seeds sample data on first request. Set `DATABASE_URL` to a Neon connection string to use the real database (production always does). Every external service (Stripe, Resend, Twilio, Cloudflare, Clerk) degrades gracefully when its keys are absent — calls log the intended action instead of failing, and checkout confirms orders directly without Stripe.
+
+For a real database:
+
+```bash
+cp .env.example .env.local   # add DATABASE_URL (Neon) + any keys you have
+npm run db:reset             # migrate + seed
+npm run dev
+```
 
 ### Database scripts
 

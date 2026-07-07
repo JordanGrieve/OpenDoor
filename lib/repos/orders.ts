@@ -270,8 +270,33 @@ export interface AdminOrder extends Order {
   slotLabel: string | null;
 }
 
+function asArray(raw: unknown): Row[] {
+  if (Array.isArray(raw)) return raw as Row[];
+  if (typeof raw === "string") {
+    try {
+      const p = JSON.parse(raw);
+      return Array.isArray(p) ? p : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+function asObject(raw: unknown): Row | null {
+  if (raw && typeof raw === "object") return raw as Row;
+  if (typeof raw === "string") {
+    try {
+      return JSON.parse(raw) as Row;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
 function mapItemsJson(raw: unknown, orderId: number): OrderItem[] {
-  const arr = Array.isArray(raw) ? raw : [];
+  const arr = asArray(raw);
   return arr.map((r: Row) => ({
     id: Number(r.id),
     orderId,
@@ -308,7 +333,7 @@ export async function listOrders(
 
   return rows.map((o) => {
     const id = Number(o.id);
-    const p = o.prefs_json as Row | null;
+    const p = asObject(o.prefs_json);
     return {
       id,
       orderNumber: String(o.order_number),
