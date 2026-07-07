@@ -47,12 +47,22 @@ Every external service degrades gracefully when its keys are absent: calls log t
 
 | Part | Status |
 |------|--------|
-| 1. Database schema + seed | ✅ done |
+| 1. Database schema + migrations + seed | ✅ done |
 | 2. Core public API (products, allergens, slots, delivery, contact) | ✅ done |
 | 3. Storefront: home, shop (+allergen filter), product, cart | ✅ done |
-| 3. Checkout + Stripe hosted session | 🚧 next |
-| 4. Stripe webhook + notifications | 🚧 next |
-| 5–8. Dashboard (orders, products, stock, settings, analytics) | 🚧 next |
-| 9. Customer accounts (Clerk) + order lookup/cancellation | 🚧 next |
-| 10. SEO / responsive polish | ongoing |
+| 3. Checkout + Stripe hosted session | ✅ done |
+| 4. Stripe webhook + notifications (email/SMS + owner alerts) | ✅ done |
+| 5. Dashboard: auth, order queue, order detail, B2B orders | ✅ done |
+| 6. Dashboard: product CRUD (variants, recipes, images, availability) | ✅ done |
+| 7. Dashboard: stock + auto shopping list | ✅ done |
+| 8. Dashboard: settings + analytics + CSV export | ✅ done |
+| 9. Customer accounts (Clerk, optional) + reorder + lookup/cancel | ✅ done |
+| 10. SEO (sitemap/robots/metadata) + allergen filters + responsive | ✅ done |
+
+### Admin access
+`/dashboard/login` — password from `ADMIN_PASSWORD` (defaults to `opendoor` in dev). Single owner, one password.
+
+### Notes
+- Customer accounts (Clerk) are optional and only appear when `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` is set; guest checkout is always the default.
+- Card data never touches this app — Stripe hosted Checkout only. Orders are created `pending` at session creation and confirmed by the webhook (a dev fallback confirms directly when Stripe keys are absent).
 ```

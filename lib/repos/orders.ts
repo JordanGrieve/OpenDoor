@@ -5,7 +5,7 @@
 import { sql } from "@/lib/db";
 import { num } from "@/lib/money";
 import { getDeliverySettings } from "@/lib/repos/store";
-import type { CheckoutRequest, Order, OrderItem, OrderStatus } from "@/lib/types";
+import type { CartItem, CheckoutRequest, Order, OrderItem, OrderStatus } from "@/lib/types";
 
 type Row = Record<string, unknown>;
 
@@ -363,6 +363,73 @@ export async function getOrderNotifications(orderId: number): Promise<OrderNotif
     detail: (r.detail as string) ?? null,
     createdAt: String(r.created_at),
   }));
+}
+
+// ── Customer account: order history + one-tap reorder ──────────
+
+export interface AccountOrder {
+  id: number;
+  orderNumber: string;
+  status: OrderStatus;
+  type: Order["type"];
+  fulfilmentDate: string | null;
+  total: number;
+  createdAt: string;
+  lines: { name: string; quantity: number; unitPrice: number }[];
+  reorderItems: CartItem[]; // only currently-available lines
+}
+
+export async function getAccountOrders(email: string): Promise<AccountOrder[]> {
+  const rows = (await sql`
+    SELECT o.id, o.order_number, o.status, o.type, o.fulfilment_date, o.total, o.created_at,
+           oi.product_id, oi.variant_id, oi.name_snapshot, oi.quantity, oi.unit_price, oi.notes,
+           p.slug, p.name AS product_name, p.lead_time_days, p.celebration, p.archived,
+           (SELECT url FROM product_images pi WHERE pi.product_id = p.id ORDER BY position LIMIT 1) AS image_url,
+           COALESCE(v.price, p.price) AS current_price, v.label AS variant_label
+    FROM orders o
+    JOIN order_items oi ON oi.order_id = o.id
+    LEFT JOIN products p ON p.id = oi.product_id
+    LEFT JOIN product_variants v ON v.id = oi.variant_id
+    WHERE lower(o.customer_email) = ${email.toLowerCase()}
+    ORDER BY o.created_at DESC, oi.id
+  `) as Row[];
+
+  const byOrder = new Map<number, AccountOrder>();
+  for (const r of rows) {
+    const oid = Number(r.id);
+    if (!byOrder.has(oid)) {
+      byOrder.set(oid, {
+        id: oid,
+        orderNumber: String(r.order_number),
+        status: r.status as OrderStatus,
+        type: r.type as Order["type"],
+        fulfilmentDate: r.fulfilment_date ? String(r.fulfilment_date).slice(0, 10) : null,
+        total: num(r.total),
+        createdAt: String(r.created_at),
+        lines: [],
+        reorderItems: [],
+      });
+    }
+    const o = byOrder.get(oid)!;
+    o.lines.push({ name: String(r.name_snapshot), quantity: Number(r.quantity), unitPrice: num(r.unit_price) });
+
+    // reorderable only if the product still exists and isn't archived
+    if (r.product_id && r.slug && !r.archived) {
+      o.reorderItems.push({
+        productId: Number(r.product_id),
+        slug: String(r.slug),
+        variantId: r.variant_id === null ? null : Number(r.variant_id),
+        name: String(r.product_name ?? r.name_snapshot),
+        variantLabel: (r.variant_label as string) ?? null,
+        price: num(r.current_price),
+        quantity: Number(r.quantity),
+        leadTimeDays: Number(r.lead_time_days ?? 0),
+        imageUrl: (r.image_url as string) ?? null,
+        celebration: Boolean(r.celebration),
+      });
+    }
+  }
+  return [...byOrder.values()];
 }
 
 // ── Manual B2B / contract order (no Stripe) ────────────────────

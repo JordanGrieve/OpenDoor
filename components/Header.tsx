@@ -3,6 +3,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useCart } from "@/components/cart/CartContext";
+import { clerkEnabled } from "@/lib/clerk";
+import AccountNav from "@/components/store/AccountNav";
 
 const NAV = [
   { href: "/", label: "Home" },
@@ -123,6 +125,7 @@ export default function Header() {
                 </span>
               )}
             </Link>
+            {clerkEnabled && <AccountNav />}
           </nav>
         </div>
 

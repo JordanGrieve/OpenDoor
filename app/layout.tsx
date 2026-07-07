@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
+import { clerkEnabled } from "@/lib/clerk";
 import "./globals.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -21,7 +23,7 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
+  const html = (
     <html lang="en-GB">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -34,4 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>{children}</body>
     </html>
   );
+
+  // Only mount ClerkProvider when a key is configured (guest checkout otherwise).
+  return clerkEnabled ? <ClerkProvider>{html}</ClerkProvider> : html;
 }
