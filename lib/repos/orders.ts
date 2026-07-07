@@ -263,3 +263,136 @@ async function hydrate(o: Row): Promise<Order> {
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
+
+// ── Admin listing / detail ─────────────────────────────────────
+
+export interface AdminOrder extends Order {
+  slotLabel: string | null;
+}
+
+function mapItemsJson(raw: unknown, orderId: number): OrderItem[] {
+  const arr = Array.isArray(raw) ? raw : [];
+  return arr.map((r: Row) => ({
+    id: Number(r.id),
+    orderId,
+    productId: r.product_id === null ? null : Number(r.product_id),
+    variantId: r.variant_id === null ? null : Number(r.variant_id),
+    nameSnapshot: String(r.name_snapshot),
+    quantity: Number(r.quantity),
+    unitPrice: num(r.unit_price),
+    notes: (r.notes as string) ?? null,
+  }));
+}
+
+export async function listOrders(
+  opts: { status?: string | null; type?: string | null; from?: string | null; to?: string | null } = {}
+): Promise<AdminOrder[]> {
+  const status = opts.status ?? null;
+  const type = opts.type ?? null;
+  const from = opts.from ?? null;
+  const to = opts.to ?? null;
+
+  const rows = (await sql`
+    SELECT o.*, cs.label AS slot_label,
+      COALESCE((SELECT json_agg(oi ORDER BY oi.id) FROM order_items oi WHERE oi.order_id = o.id), '[]') AS items_json,
+      (SELECT json_build_object('email_opt_in', np.email_opt_in, 'sms_opt_in', np.sms_opt_in)
+       FROM notification_prefs np WHERE np.order_id = o.id) AS prefs_json
+    FROM orders o
+    LEFT JOIN collection_slots cs ON cs.id = o.collection_slot_id
+    WHERE (${status}::text IS NULL OR o.status = ${status})
+      AND (${type}::text IS NULL OR o.type = ${type})
+      AND (${from}::date IS NULL OR o.fulfilment_date >= ${from})
+      AND (${to}::date IS NULL OR o.fulfilment_date <= ${to})
+    ORDER BY o.fulfilment_date NULLS LAST, cs.sort_order NULLS LAST, o.created_at
+  `) as Row[];
+
+  return rows.map((o) => {
+    const id = Number(o.id);
+    const p = o.prefs_json as Row | null;
+    return {
+      id,
+      orderNumber: String(o.order_number),
+      type: o.type as Order["type"],
+      status: o.status as OrderStatus,
+      customerId: o.customer_id === null ? null : Number(o.customer_id),
+      customerName: String(o.customer_name),
+      customerEmail: String(o.customer_email),
+      customerPhone: (o.customer_phone as string) ?? null,
+      deliveryAddress: (o.delivery_address as string) ?? null,
+      deliveryPostcode: (o.delivery_postcode as string) ?? null,
+      collectionSlotId: o.collection_slot_id === null ? null : Number(o.collection_slot_id),
+      fulfilmentDate: o.fulfilment_date ? String(o.fulfilment_date).slice(0, 10) : null,
+      notes: (o.notes as string) ?? null,
+      subtotal: num(o.subtotal),
+      deliveryFee: num(o.delivery_fee),
+      total: num(o.total),
+      stripeSessionId: (o.stripe_session_id as string) ?? null,
+      stripePaymentId: (o.stripe_payment_id as string) ?? null,
+      createdAt: String(o.created_at),
+      updatedAt: String(o.updated_at),
+      cancelledAt: o.cancelled_at ? String(o.cancelled_at) : null,
+      refundedAt: o.refunded_at ? String(o.refunded_at) : null,
+      items: mapItemsJson(o.items_json, id),
+      prefs: p ? { emailOptIn: Boolean(p.email_opt_in), smsOptIn: Boolean(p.sms_opt_in) } : undefined,
+      slotLabel: (o.slot_label as string) ?? null,
+    };
+  });
+}
+
+export interface OrderNotificationLog {
+  id: number;
+  channel: string;
+  event: string;
+  recipient: string;
+  status: string;
+  detail: string | null;
+  createdAt: string;
+}
+
+export async function getOrderNotifications(orderId: number): Promise<OrderNotificationLog[]> {
+  const rows = (await sql`
+    SELECT id, channel, event, recipient, status, detail, created_at
+    FROM order_notifications WHERE order_id = ${orderId} ORDER BY created_at
+  `) as Row[];
+  return rows.map((r) => ({
+    id: Number(r.id),
+    channel: String(r.channel),
+    event: String(r.event),
+    recipient: String(r.recipient),
+    status: String(r.status),
+    detail: (r.detail as string) ?? null,
+    createdAt: String(r.created_at),
+  }));
+}
+
+// ── Manual B2B / contract order (no Stripe) ────────────────────
+
+export interface ManualOrderInput {
+  customer: { name: string; email: string; phone?: string | null };
+  items: { name: string; quantity: number; unitPrice: number; productId?: number | null; notes?: string | null }[];
+  fulfilmentDate?: string | null;
+  notes?: string | null;
+}
+
+export async function createManualOrder(input: ManualOrderInput): Promise<{ id: number; orderNumber: string; total: number }> {
+  if (!input.items.length) throw new Error("Add at least one line item.");
+  const subtotal = round2(input.items.reduce((t, i) => t + i.unitPrice * i.quantity, 0));
+
+  const orderRows = (await sql`
+    INSERT INTO orders (type, status, customer_name, customer_email, customer_phone, fulfilment_date, notes, subtotal, delivery_fee, total)
+    VALUES ('contract', 'confirmed', ${input.customer.name}, ${input.customer.email}, ${input.customer.phone ?? null},
+            ${input.fulfilmentDate ?? null}, ${input.notes ?? null}, ${subtotal}, 0, ${subtotal})
+    RETURNING id, order_number
+  `) as Row[];
+  const id = Number(orderRows[0].id);
+  const orderNumber = String(orderRows[0].order_number);
+
+  for (const it of input.items) {
+    await sql`
+      INSERT INTO order_items (order_id, product_id, variant_id, name_snapshot, quantity, unit_price, notes)
+      VALUES (${id}, ${it.productId ?? null}, ${null}, ${it.name}, ${it.quantity}, ${it.unitPrice}, ${it.notes ?? null})
+    `;
+  }
+  await sql`INSERT INTO notification_prefs (order_id, email_opt_in, sms_opt_in) VALUES (${id}, FALSE, FALSE) ON CONFLICT DO NOTHING`;
+  return { id, orderNumber, total: subtotal };
+}
