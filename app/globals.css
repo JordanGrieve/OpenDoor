@@ -1,0 +1,209 @@
+/* ═══════════════════════════════════════════════════════════════
+   Open Door Bakery — design tokens (ported verbatim from the
+   approved mockup) + base styles + responsive rules.
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --cream: #f6efe3;
+  --cream-deep: #efe5d3;
+  --card: #fffdf8;
+  --ink: #473529;
+  --muted: #9c8a78;
+  --accent: #c08a52;
+  --accent-deep: #9c6f43;
+  --blush: #ecc7c2;
+  --blush-soft: #f6e3df;
+  --line: #e8dcc9;
+  --danger: #b5482f;
+  --wrap: 1180px;
+}
+
+* {
+  box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+}
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: Mulish, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+::selection {
+  background: var(--blush);
+}
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@keyframes pbfade {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.pbfade {
+  animation: pbfade 0.5s ease;
+}
+
+/* Shared layout helpers */
+.wrap {
+  max-width: var(--wrap);
+  margin: 0 auto;
+}
+.eyebrow {
+  font: 600 12.5px Mulish;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+}
+
+/* Buttons */
+.btn {
+  cursor: pointer;
+  border: none;
+  font-family: Mulish;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-radius: 999px;
+  font-weight: 700;
+  box-shadow: 0 12px 26px -12px rgba(150, 100, 50, 0.8);
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.btn-primary:hover {
+  background: var(--accent-deep);
+}
+.btn-outline {
+  background: var(--card);
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  font-weight: 700;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.btn-outline:hover {
+  background: var(--ink);
+  color: #fff;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+}
+.field {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  background: #fffdf8;
+  font: 400 15px Mulish;
+  color: var(--ink);
+  outline: none;
+}
+.field:focus {
+  border-color: var(--accent);
+}
+.field-label {
+  display: block;
+  font: 600 12px Mulish;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+.field-error {
+  color: var(--danger);
+  font: 600 12.5px Mulish;
+  margin-top: 6px;
+}
+
+/* Product image radial sheen used across cards */
+.sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 80% at 28% 16%, rgba(255, 255, 255, 0.36), transparent 60%);
+  pointer-events: none;
+}
+
+/* Responsive grids — mobile-first collapse (matches mockup) */
+.grid-2cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+.grid-3cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+.grid-4cols {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+@media (max-width: 900px) {
+  .grid-3cols {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 768px) {
+  .grid-2cols {
+    grid-template-columns: 1fr;
+  }
+  .grid-3cols {
+    grid-template-columns: 1fr;
+  }
+  .grid-4cols {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  [data-mobile-burger] {
+    display: block !important;
+  }
+  [data-desktop-nav] {
+    display: none !important;
+  }
+}
+@media (max-width: 480px) {
+  .grid-4cols {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Footer + gallery responsive collapse */
+.footer-grid {
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+}
+@media (max-width: 768px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .gallery-cols {
+    columns: 2 !important;
+  }
+}
+@media (max-width: 480px) {
+  .footer-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .gallery-cols {
+    columns: 1 !important;
+  }
+}
