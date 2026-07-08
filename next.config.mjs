@@ -5,9 +5,8 @@ const nextConfig = {
   serverExternalPackages: ["@electric-sql/pglite"],
   images: {
     remotePatterns: [
-      // Cloudflare Images delivery
-      { protocol: "https", hostname: "imagedelivery.net" },
-      { protocol: "https", hostname: "**.cloudflareimages.com" },
+      // Cloudinary delivery
+      { protocol: "https", hostname: "res.cloudinary.com" },
     ],
   },
 };
