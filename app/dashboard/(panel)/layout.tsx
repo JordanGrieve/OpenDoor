@@ -6,7 +6,7 @@ export default function PanelLayout({ children }: { children: React.ReactNode })
   return (
     <div style={{ display: "flex", background: "var(--cream)", minHeight: "100vh" }}>
       <DashboardNav />
-      <main style={{ flex: 1, padding: "32px 36px", maxWidth: 1200, minWidth: 0 }}>{children}</main>
+      <main style={{ flex: 1, padding: "32px 40px", minWidth: 0 }}>{children}</main>
     </div>
   );
 }
