@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { clerkMiddleware, createRouteMatcher, clerkClient } from "@clerk/nextjs/server";
-import { SESSION_COOKIE, isValidSession } from "@/lib/auth";
+import { SESSION_COOKIE, isValidSession, adminVerifiedToken } from "@/lib/auth";
 
 const clerkEnabled = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 const allowedEmails = (process.env.ADMIN_ALLOWED_EMAILS || "")
@@ -9,6 +9,7 @@ const allowedEmails = (process.env.ADMIN_ALLOWED_EMAILS || "")
   .filter(Boolean);
 
 const isAdminArea = createRouteMatcher(["/dashboard(.*)", "/api/admin(.*)"]);
+const ADMIN_VERIFIED_COOKIE = "od_admin_verified";
 
 // ── Clerk path: owner login + email allowlist for the dashboard ──
 const withClerk = clerkMiddleware(async (auth, req) => {
@@ -25,6 +26,12 @@ const withClerk = clerkMiddleware(async (auth, req) => {
   }
 
   if (allowedEmails.length) {
+    // Fast path: this user already passed the allowlist recently (signed cookie).
+    const verified = await adminVerifiedToken(userId);
+    if (req.cookies.get(ADMIN_VERIFIED_COOKIE)?.value === verified) {
+      return NextResponse.next();
+    }
+    // Slow path: verify the email against Clerk once, then cache it.
     const client = await clerkClient();
     const user = await client.users.getUser(userId);
     const email = user.primaryEmailAddress?.emailAddress?.toLowerCase();
@@ -32,6 +39,14 @@ const withClerk = clerkMiddleware(async (auth, req) => {
       if (isApi) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       return NextResponse.redirect(new URL("/dashboard/denied", req.url));
     }
+    const res = NextResponse.next();
+    res.cookies.set(ADMIN_VERIFIED_COOKIE, verified, {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 30, // re-verify every 30 min
+    });
+    return res;
   }
   return NextResponse.next();
 });

@@ -41,6 +41,15 @@ export async function sessionToken(): Promise<string> {
   return hmac(TOKEN_MESSAGE);
 }
 
+/**
+ * Token proving a Clerk user's email already passed the admin allowlist.
+ * Bound to the userId so it can't be reused by a different account, and
+ * stored in a short-lived cookie to avoid a Clerk API call on every request.
+ */
+export async function adminVerifiedToken(userId: string): Promise<string> {
+  return hmac(`admin-verified:${userId}`);
+}
+
 /** Constant-time-ish validation of a presented cookie token. */
 export async function isValidSession(token: string | undefined | null): Promise<boolean> {
   if (!token) return false;

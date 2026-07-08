@@ -46,13 +46,18 @@ export default function ProductEditor({ mode, productId }: { mode: "new" | "edit
   useEffect(() => {
     if (mode !== "edit" || !productId) return;
     (async () => {
-      const [pRes, aRes] = await Promise.all([
-        fetch(`/api/admin/products/${productId}`).then((r) => r.json()),
-        fetch(`/api/admin/products/${productId}/availability`).then((r) => r.json()),
-      ]);
-      const p: Product = pRes.product;
-      const recipes: Record<number, RecipeRow[]> = pRes.recipes ?? {};
-      setName(p.name);
+      try {
+        const [pRes, aRes] = await Promise.all([
+          fetch(`/api/admin/products/${productId}`).then((r) => r.json()).catch(() => ({})),
+          fetch(`/api/admin/products/${productId}/availability`).then((r) => r.json()).catch(() => ({ days: [] })),
+        ]);
+        const p: Product | undefined = pRes.product;
+        if (!p) {
+          setError("Couldn't load this product. Please try again.");
+          return;
+        }
+        const recipes: Record<number, RecipeRow[]> = pRes.recipes ?? {};
+        setName(p.name);
       setSlug(p.slug);
       setSlugTouched(true);
       setDescription(p.description);
@@ -66,9 +71,11 @@ export default function ProductEditor({ mode, productId }: { mode: "new" | "edit
       setVariants(
         p.variants.map((v) => ({ id: v.id, label: v.label, price: v.price, stockLimit: v.stockLimit, recipe: recipes[v.id] ?? [] }))
       );
-      setImages(p.images.map((i) => ({ id: i.id, url: i.url })));
-      setDays(aRes.days ?? []);
-      setLoaded(true);
+        setImages(p.images.map((i) => ({ id: i.id, url: i.url })));
+        setDays(aRes.days ?? []);
+      } finally {
+        setLoaded(true);
+      }
     })();
   }, [mode, productId]);
 

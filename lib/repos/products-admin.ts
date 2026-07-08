@@ -4,6 +4,7 @@
 // ─────────────────────────────────────────────────────────────
 import { sql } from "@/lib/db";
 import { num } from "@/lib/money";
+import { isoDate } from "@/lib/dates";
 import { getProductById } from "@/lib/repos/products";
 import type { Ingredient, Product } from "@/lib/types";
 
@@ -173,10 +174,13 @@ export async function setAvailability(productId: number, day: string, available:
 }
 
 export async function getAvailability(productId: number, fromDay: string, days = 10) {
+  const end = new Date(fromDay + "T00:00:00");
+  end.setDate(end.getDate() + days);
+  const toDay = isoDate(end);
   const rows = (await sql`
     SELECT day, available, stock_sold
     FROM product_availability
-    WHERE product_id = ${productId} AND day >= ${fromDay} AND day <= (${fromDay}::date + ${days})
+    WHERE product_id = ${productId} AND day >= ${fromDay} AND day <= ${toDay}
     ORDER BY day
   `) as Row[];
   return rows.map((r) => ({
