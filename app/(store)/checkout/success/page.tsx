@@ -1,13 +1,37 @@
 import Link from "next/link";
+import { getStripe } from "@/lib/services/stripe";
+import { confirmOrderBySession } from "@/lib/repos/orders";
+import { notifyOrderConfirmed } from "@/lib/services/notify";
 
 export const dynamic = "force-dynamic";
+
+// Confirm-on-return: the webhook is the primary path, but retrieving the
+// Checkout Session here means payment is confirmed even without a webhook
+// configured (e.g. local dev). Idempotent — notifications fire once.
+async function confirmFromSession(sessionId: string) {
+  const stripe = getStripe();
+  if (!stripe) return;
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    if (session.payment_status === "paid" || session.status === "complete") {
+      const paymentId =
+        typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null;
+      const { order, transitioned } = await confirmOrderBySession(session.id, paymentId);
+      if (order && transitioned) await notifyOrderConfirmed(order);
+    }
+  } catch (err) {
+    console.error("[checkout/success] confirm failed", err);
+  }
+}
 
 export default async function SuccessPage({
   searchParams,
 }: {
-  searchParams: Promise<{ order?: string }>;
+  searchParams: Promise<{ order?: string; session_id?: string }>;
 }) {
-  const { order } = await searchParams;
+  const { order, session_id } = await searchParams;
+  if (session_id) await confirmFromSession(session_id);
+
   return (
     <main className="pbfade wrap" style={{ padding: "80px 24px 100px", maxWidth: 640 }}>
       <div className="card" style={{ padding: 54, textAlign: "center", borderRadius: 26 }}>

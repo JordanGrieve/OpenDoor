@@ -9,8 +9,12 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import "dotenv/config";
+import dotenv from "dotenv";
 import pg from "pg";
+
+// Load .env.local first (Next.js convention), then .env as fallback.
+dotenv.config({ path: ".env.local" });
+dotenv.config();
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
