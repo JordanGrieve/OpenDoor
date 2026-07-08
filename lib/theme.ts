@@ -18,3 +18,8 @@ export function tileBackground(imageUrl: string | null, category: string): strin
   if (imageUrl) return `#efe5d3 center/cover url('${imageUrl}')`;
   return CATEGORY_GRADIENTS[category] ?? CATEGORY_GRADIENTS.Other;
 }
+
+/** The category gradient on its own (used as a fallback behind real <img> photos). */
+export function categoryGradient(category: string): string {
+  return CATEGORY_GRADIENTS[category] ?? CATEGORY_GRADIENTS.Other;
+}

@@ -3,13 +3,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ProductSummary } from "@/lib/types";
 import { formatGBP } from "@/lib/money";
-import { tileBackground } from "@/lib/theme";
+import ProductPhoto from "@/components/store/ProductPhoto";
 import { useCart } from "@/components/cart/CartContext";
 
 export default function ProductCard({ product }: { product: ProductSummary }) {
   const { add } = useCart();
   const router = useRouter();
-  const bg = tileBackground(product.imageUrl, product.category);
 
   const leadLabel =
     product.leadTimeDays <= 0
@@ -46,8 +45,9 @@ export default function ProductCard({ product }: { product: ProductSummary }) {
       <Link
         href={`/products/${product.slug}`}
         className="sheen"
-        style={{ position: "relative", height: 200, background: bg, display: "block" }}
+        style={{ position: "relative", height: 200, display: "block", overflow: "hidden" }}
       >
+        <ProductPhoto url={product.imageUrl} category={product.category} alt={product.name} />
         <span
           style={{
             position: "absolute",

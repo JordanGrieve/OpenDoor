@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Product } from "@/lib/types";
 import { formatGBP } from "@/lib/money";
-import { tileBackground } from "@/lib/theme";
+import ProductPhoto from "@/components/store/ProductPhoto";
 import { useCart } from "@/components/cart/CartContext";
 
 export default function ProductDetail({ product }: { product: Product }) {
@@ -30,10 +30,8 @@ export default function ProductDetail({ product }: { product: Product }) {
       ? "Ready tomorrow"
       : `Ready in ${product.leadTimeDays} days`;
 
-  const galleryBgs =
-    product.images.length > 0
-      ? product.images.map((i) => tileBackground(i.url, product.category))
-      : [tileBackground(null, product.category)];
+  const galleryUrls: (string | null)[] =
+    product.images.length > 0 ? product.images.map((i) => i.url) : [null];
   const [activeImg, setActiveImg] = useState(0);
 
   const onAdd = () => {
@@ -61,20 +59,23 @@ export default function ProductDetail({ product }: { product: Product }) {
       <div className="grid-2cols" style={{ gap: 50, alignItems: "start" }}>
         {/* Gallery */}
         <div style={{ position: "sticky", top: 90 }}>
-          <div className="sheen" style={{ position: "relative", aspectRatio: "1", borderRadius: 28, overflow: "hidden", background: galleryBgs[activeImg], boxShadow: "0 30px 56px -30px rgba(120,80,40,.5)" }}>
+          <div className="sheen" style={{ position: "relative", aspectRatio: "1", borderRadius: 28, overflow: "hidden", boxShadow: "0 30px 56px -30px rgba(120,80,40,.5)" }}>
+            <ProductPhoto url={galleryUrls[activeImg]} category={product.category} alt={product.name} />
             <span style={{ position: "absolute", top: 14, right: 14, background: "var(--ink)", color: "#f3e7d6", font: "600 11px Mulish", padding: "6px 12px", borderRadius: 999, zIndex: 1 }}>
               {leadLabel}
             </span>
           </div>
-          {galleryBgs.length > 1 && (
-            <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
-              {galleryBgs.map((bg, i) => (
+          {galleryUrls.length > 1 && (
+            <div style={{ display: "flex", gap: 10, marginTop: 12, flexWrap: "wrap" }}>
+              {galleryUrls.map((url, i) => (
                 <button
                   key={i}
                   onClick={() => setActiveImg(i)}
-                  aria-label={`Image ${i + 1}`}
-                  style={{ width: 64, height: 64, borderRadius: 14, background: bg, border: i === activeImg ? "2px solid var(--accent)" : "2px solid transparent", cursor: "pointer" }}
-                />
+                  aria-label={`View image ${i + 1}`}
+                  style={{ position: "relative", width: 64, height: 64, borderRadius: 14, overflow: "hidden", padding: 0, border: i === activeImg ? "2px solid var(--accent)" : "2px solid transparent", cursor: "pointer", background: "none" }}
+                >
+                  <ProductPhoto url={url} category={product.category} alt={`${product.name} thumbnail ${i + 1}`} />
+                </button>
               ))}
             </div>
           )}
