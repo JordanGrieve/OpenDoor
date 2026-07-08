@@ -1,15 +1,46 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { clerkMiddleware } from "@clerk/nextjs/server";
+import { clerkMiddleware, createRouteMatcher, clerkClient } from "@clerk/nextjs/server";
 import { SESSION_COOKIE, isValidSession } from "@/lib/auth";
 
 const clerkEnabled = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
+const allowedEmails = (process.env.ADMIN_ALLOWED_EMAILS || "")
+  .split(",")
+  .map((s) => s.trim().toLowerCase())
+  .filter(Boolean);
 
-// Admin guard: protects /dashboard/* and /api/admin/* behind the owner session.
-async function adminGuard(req: NextRequest): Promise<Response> {
+const isAdminArea = createRouteMatcher(["/dashboard(.*)", "/api/admin(.*)"]);
+
+// ── Clerk path: owner login + email allowlist for the dashboard ──
+const withClerk = clerkMiddleware(async (auth, req) => {
+  if (!isAdminArea(req)) return NextResponse.next();
+  // the "not authorised" page must stay reachable to avoid a redirect loop
+  if (req.nextUrl.pathname === "/dashboard/denied") return NextResponse.next();
+
+  const isApi = req.nextUrl.pathname.startsWith("/api/");
+  const { userId, redirectToSignIn } = await auth();
+
+  if (!userId) {
+    if (isApi) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return redirectToSignIn({ returnBackUrl: req.url });
+  }
+
+  if (allowedEmails.length) {
+    const client = await clerkClient();
+    const user = await client.users.getUser(userId);
+    const email = user.primaryEmailAddress?.emailAddress?.toLowerCase();
+    if (!email || !allowedEmails.includes(email)) {
+      if (isApi) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return NextResponse.redirect(new URL("/dashboard/denied", req.url));
+    }
+  }
+  return NextResponse.next();
+});
+
+// ── Fallback path: password session cookie (when Clerk isn't configured) ──
+async function passwordGuard(req: NextRequest): Promise<Response> {
   const { pathname } = req.nextUrl;
   const isLoginPage = pathname === "/dashboard/login";
   const isAuthApi = pathname === "/api/admin/login" || pathname === "/api/admin/logout";
-
   const guarded =
     (pathname.startsWith("/dashboard") && !isLoginPage) ||
     (pathname.startsWith("/api/admin") && !isAuthApi);
@@ -23,21 +54,15 @@ async function adminGuard(req: NextRequest): Promise<Response> {
       return NextResponse.redirect(url);
     }
   }
-
   if (isLoginPage && (await isValidSession(req.cookies.get(SESSION_COOKIE)?.value))) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
-
   return NextResponse.next();
 }
 
-// When Clerk is enabled, run its middleware (so customer auth works on the
-// storefront) and still apply the admin guard. Otherwise just the guard.
-export default clerkEnabled
-  ? clerkMiddleware(async (_auth, req) => adminGuard(req as unknown as NextRequest))
-  : adminGuard;
+export default clerkEnabled ? withClerk : passwordGuard;
 
+// Only run on the admin surface — the storefront is entirely Clerk-free.
 export const config = {
-  // run on everything except static assets + files with extensions
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)", "/api/:path*"],
+  matcher: ["/dashboard/:path*", "/api/admin/:path*"],
 };

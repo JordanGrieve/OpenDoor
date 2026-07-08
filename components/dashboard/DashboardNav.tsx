@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import SignOut from "@/components/dashboard/SignOut";
 
 const LINKS = [
   { href: "/dashboard", label: "Orders", exact: true },
@@ -12,16 +13,9 @@ const LINKS = [
 
 export default function DashboardNav() {
   const pathname = usePathname();
-  const router = useRouter();
 
   const active = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname.startsWith(href);
-
-  const logout = async () => {
-    await fetch("/api/admin/logout", { method: "POST" });
-    router.push("/dashboard/login");
-    router.refresh();
-  };
 
   return (
     <aside
@@ -70,13 +64,7 @@ export default function DashboardNav() {
         <Link href="/" style={{ padding: "10px 14px", font: "500 13px Mulish", color: "#9c8a78" }}>
           ↗ View storefront
         </Link>
-        <button
-          onClick={logout}
-          className="btn"
-          style={{ textAlign: "left", padding: "10px 14px", font: "600 13px Mulish", color: "#c9b8a3", background: "none", borderRadius: 10 }}
-        >
-          Sign out
-        </button>
+        <SignOut />
       </div>
     </aside>
   );
