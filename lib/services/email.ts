@@ -19,8 +19,14 @@ function client(): Resend | null {
 const FROM = () => process.env.EMAIL_FROM || "Open Door Bakery <orders@thepastrybox.co.uk>";
 const REPLY_DOMAIN = () => process.env.EMAIL_REPLY_DOMAIN || "thepastrybox.co.uk";
 
-/** Per-order Reply-To for future threading: order+ORD-0084@domain */
+/**
+ * Reply-To for order emails. If EMAIL_REPLY_TO is set (e.g. a plain inbox
+ * or your ticket-system ingest address) it's used verbatim; otherwise falls
+ * back to a per-order threaded address (order+ORD-0084@domain).
+ */
 export function replyToForOrder(orderNumber: string): string {
+  const override = process.env.EMAIL_REPLY_TO?.trim();
+  if (override) return override;
   return `order+${orderNumber}@${REPLY_DOMAIN()}`;
 }
 
