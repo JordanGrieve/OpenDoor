@@ -59,6 +59,15 @@ a {
   animation: pbfade 0.5s ease;
 }
 
+/* Horizontal scroll rows (e.g. allergen filter) — hide the scrollbar */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Shared layout helpers */
 .wrap {
   max-width: var(--wrap);

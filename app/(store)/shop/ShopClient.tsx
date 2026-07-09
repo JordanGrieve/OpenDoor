@@ -95,33 +95,37 @@ export default function ShopClient() {
         })}
       </div>
 
-      {/* Allergen filter */}
+      {/* Allergen filter — single scrollable line */}
       {allergens.length > 0 && (
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", alignItems: "center", marginBottom: 36 }}>
-          <span style={{ font: "600 12px Mulish", letterSpacing: ".06em", textTransform: "uppercase", color: "var(--muted)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 36 }}>
+          <span style={{ font: "600 12px Mulish", letterSpacing: ".06em", textTransform: "uppercase", color: "var(--muted)", whiteSpace: "nowrap", flexShrink: 0 }}>
             Hide items with:
           </span>
-          {allergens.map((a) => {
-            const on = excluded.has(a.slug);
-            return (
-              <button
-                key={a.id}
-                onClick={() => toggleAllergen(a.slug)}
-                className="btn"
-                style={{
-                  border: `1.5px solid ${on ? "var(--danger)" : "var(--line)"}`,
-                  background: on ? "var(--blush-soft)" : "var(--card)",
-                  color: on ? "var(--danger)" : "var(--muted)",
-                  padding: "6px 13px",
-                  borderRadius: 999,
-                  font: "600 12.5px Mulish",
-                }}
-              >
-                {on ? "✕ " : ""}
-                {a.name}
-              </button>
-            );
-          })}
+          <div className="no-scrollbar" style={{ display: "flex", gap: 8, overflowX: "auto", flexWrap: "nowrap", flex: 1, paddingBottom: 2, WebkitOverflowScrolling: "touch" }}>
+            {allergens.map((a) => {
+              const on = excluded.has(a.slug);
+              return (
+                <button
+                  key={a.id}
+                  onClick={() => toggleAllergen(a.slug)}
+                  className="btn"
+                  style={{
+                    border: `1.5px solid ${on ? "var(--danger)" : "var(--line)"}`,
+                    background: on ? "var(--blush-soft)" : "var(--card)",
+                    color: on ? "var(--danger)" : "var(--muted)",
+                    padding: "6px 13px",
+                    borderRadius: 999,
+                    font: "600 12.5px Mulish",
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
+                  }}
+                >
+                  {on ? "✕ " : ""}
+                  {a.name}
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 
