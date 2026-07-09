@@ -27,8 +27,11 @@ const withClerk = clerkMiddleware(async (auth, req) => {
 
   if (allowedEmails.length) {
     // Fast path: this user already passed the allowlist recently (signed cookie).
+    // Only trusted when SESSION_SECRET is set — otherwise the token would be
+    // signed with a well-known dev default and could be forged.
+    const canFastPath = Boolean(process.env.SESSION_SECRET);
     const verified = await adminVerifiedToken(userId);
-    if (req.cookies.get(ADMIN_VERIFIED_COOKIE)?.value === verified) {
+    if (canFastPath && req.cookies.get(ADMIN_VERIFIED_COOKIE)?.value === verified) {
       return NextResponse.next();
     }
     // Slow path: verify the email against Clerk once, then cache it.
