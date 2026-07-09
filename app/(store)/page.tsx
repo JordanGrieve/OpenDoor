@@ -103,7 +103,7 @@ export default async function HomePage() {
           <span className="eyebrow">Loved by locals</span>
           <h2 style={{ font: "500 36px/1 'Playfair Display',serif", color: "var(--ink)", margin: "8px 0 0" }}>Bestselling boxes</h2>
         </div>
-        <div className="grid-3cols">
+        <div className="grid-products">
           {best.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}

@@ -173,6 +173,23 @@ a {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* Product-card grid: 3 → 2 columns, staying 2-up on mobile */
+.grid-products {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+@media (max-width: 900px) {
+  .grid-products {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 480px) {
+  .grid-products {
+    gap: 12px;
+  }
+}
 @media (max-width: 768px) {
   .grid-2cols {
     grid-template-columns: 1fr;

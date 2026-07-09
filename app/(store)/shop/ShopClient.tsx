@@ -101,7 +101,7 @@ export default function ShopClient() {
           <span style={{ font: "600 12px Mulish", letterSpacing: ".06em", textTransform: "uppercase", color: "var(--muted)", whiteSpace: "nowrap", flexShrink: 0 }}>
             Hide items with:
           </span>
-          <div className="no-scrollbar" style={{ display: "flex", gap: 8, overflowX: "auto", flexWrap: "nowrap", flex: 1, paddingBottom: 2, WebkitOverflowScrolling: "touch" }}>
+          <div className="no-scrollbar" style={{ display: "flex", gap: 8, overflowX: "auto", flexWrap: "nowrap", flex: 1, minWidth: 0, marginRight: -24, paddingRight: 24, paddingBottom: 2, WebkitOverflowScrolling: "touch" }}>
             {allergens.map((a) => {
               const on = excluded.has(a.slug);
               return (
@@ -136,7 +136,7 @@ export default function ShopClient() {
           Nothing matches those filters — try clearing an allergen.
         </p>
       ) : (
-        <div className="grid-3cols">
+        <div className="grid-products">
           {filtered.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
