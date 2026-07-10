@@ -13,6 +13,8 @@ export default function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [done, setDone] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const emailOk = (e: string) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e);
 
@@ -24,12 +26,26 @@ export default function ContactPage() {
     if (!form.message.trim()) er.message = "Type your message";
     setErrors(er);
     if (Object.keys(er).length) return;
-    await fetch("/api/contact", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ kind: "contact", ...form }),
-    });
-    setDone(true);
+
+    setSending(true);
+    setSubmitError("");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind: "contact", ...form }),
+      });
+      if (res.ok) {
+        setDone(true);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setSubmitError(data.error || "Something went wrong. Please try again.");
+        setSending(false);
+      }
+    } catch {
+      setSubmitError("Couldn't send — please check your connection and try again.");
+      setSending(false);
+    }
   };
 
   const upd = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -67,8 +83,9 @@ export default function ContactPage() {
               <Field label="Message" error={errors.message}>
                 <textarea className="field" rows={5} placeholder="How can we help?" value={form.message} onChange={upd("message")} style={{ resize: "vertical" }} />
               </Field>
-              <button type="submit" className="btn btn-primary" style={{ width: "100%", padding: 15, fontSize: 15, borderRadius: 14 }}>
-                Send message
+              {submitError && <div className="field-error" style={{ marginBottom: 10 }}>{submitError}</div>}
+              <button type="submit" disabled={sending} className="btn btn-primary" style={{ width: "100%", padding: 15, fontSize: 15, borderRadius: 14, opacity: sending ? 0.7 : 1 }}>
+                {sending ? "Sending…" : "Send message"}
               </button>
             </form>
           )}

@@ -14,6 +14,8 @@ export default function CustomPage() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [done, setDone] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const emailOk = (e: string) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e);
 
   const upd = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -28,13 +30,27 @@ export default function CustomPage() {
     if (!form.message.trim()) er.message = "A few details help us help you";
     setErrors(er);
     if (Object.keys(er).length) return;
-    await fetch("/api/contact", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ kind: "custom", ...form }),
-    });
-    setDone(true);
-    window.scrollTo({ top: 0 });
+
+    setSending(true);
+    setSubmitError("");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind: "custom", ...form }),
+      });
+      if (res.ok) {
+        setDone(true);
+        window.scrollTo({ top: 0 });
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setSubmitError(data.error || "Something went wrong. Please try again.");
+        setSending(false);
+      }
+    } catch {
+      setSubmitError("Couldn't send — please check your connection and try again.");
+      setSending(false);
+    }
   };
 
   return (
@@ -123,8 +139,9 @@ export default function CustomPage() {
           <p style={{ font: "400 13px/1.6 Mulish", color: "var(--muted)", margin: "18px 0 0" }}>
             Custom orders need at least 5 days&apos; notice (larger events, 2 weeks). Nothing is charged until you&apos;ve confirmed the details with Emma.
           </p>
-          <button type="submit" className="btn btn-primary" style={{ width: "100%", marginTop: 18, padding: 16, fontSize: 16, borderRadius: 14 }}>
-            Send enquiry
+          {submitError && <div className="field-error" style={{ marginTop: 12 }}>{submitError}</div>}
+          <button type="submit" disabled={sending} className="btn btn-primary" style={{ width: "100%", marginTop: 18, padding: 16, fontSize: 16, borderRadius: 14, opacity: sending ? 0.7 : 1 }}>
+            {sending ? "Sending…" : "Send enquiry"}
           </button>
         </form>
       )}
