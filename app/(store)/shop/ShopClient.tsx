@@ -71,8 +71,22 @@ export default function ShopClient() {
         </p>
       </div>
 
-      {/* Category chips */}
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center", marginBottom: 18 }}>
+      {/* Category tabs */}
+      <div
+        className="no-scrollbar"
+        style={{
+          display: "flex",
+          gap: 26,
+          alignItems: "center",
+          overflowX: "auto",
+          flexWrap: "nowrap",
+          borderBottom: "1px solid var(--line)",
+          marginBottom: 18,
+          marginRight: -24,
+          paddingRight: 24,
+          WebkitOverflowScrolling: "touch",
+        }}
+      >
         {categories.map((c) => {
           const active = category === c;
           return (
@@ -81,12 +95,15 @@ export default function ShopClient() {
               onClick={() => setParam("category", c)}
               className="btn"
               style={{
-                border: `1.5px solid ${active ? "var(--accent)" : "var(--line)"}`,
-                background: active ? "var(--accent)" : "var(--card)",
-                color: active ? "#fff" : "var(--ink)",
-                padding: "9px 18px",
-                borderRadius: 999,
-                font: "600 13.5px Mulish",
+                background: "none",
+                border: "none",
+                borderBottom: `2px solid ${active ? "var(--accent)" : "transparent"}`,
+                marginBottom: -1,
+                padding: "0 1px 12px",
+                font: "500 16px 'Playfair Display',serif",
+                color: active ? "var(--ink)" : "var(--muted)",
+                whiteSpace: "nowrap",
+                flexShrink: 0,
               }}
             >
               {c}
