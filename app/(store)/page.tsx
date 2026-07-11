@@ -29,7 +29,9 @@ export default async function HomePage() {
   const categories = Array.from(new Set(products.map((p) => p.category)));
   const categoryCards = categories.slice(0, 8).map((cat) => {
     const items = products.filter((p) => p.category === cat);
-    return { label: cat, count: `${items.length} ${items.length === 1 ? "treat" : "treats"}`, sample: items[0] };
+    // prefer a product that actually has a photo for the category thumbnail
+    const sample = items.find((p) => p.imageUrl) ?? items[0];
+    return { label: cat, count: `${items.length} ${items.length === 1 ? "treat" : "treats"}`, sample };
   });
 
   return (
@@ -135,7 +137,7 @@ export default async function HomePage() {
 
       {/* About */}
       <section style={{ background: "var(--cream-deep)", marginTop: 44 }}>
-        <div className="wrap grid-2cols" style={{ padding: "80px 24px", alignItems: "center", gap: 54 }}>
+        <div className="wrap grid-2cols sec-pad-lg" style={{ alignItems: "center", gap: 54 }}>
           <div
             role="img"
             aria-label="Emma, the baker behind Open Door"
@@ -166,7 +168,7 @@ export default async function HomePage() {
       </section>
 
       {/* Delivery / Collection */}
-      <section className="wrap" style={{ padding: "80px 24px" }}>
+      <section className="wrap sec-pad-lg">
         <div style={{ textAlign: "center", marginBottom: 34 }}>
           <span className="eyebrow">Getting your box</span>
           <h2 style={{ font: "500 36px/1 'Playfair Display',serif", color: "var(--ink)", margin: "8px 0 0" }}>Collection &amp; local delivery</h2>
@@ -193,7 +195,7 @@ export default async function HomePage() {
 
       {/* Reviews */}
       <section style={{ background: "var(--cream-deep)" }}>
-        <div className="wrap" style={{ padding: "80px 24px" }}>
+        <div className="wrap sec-pad-lg">
           <div style={{ textAlign: "center", marginBottom: 34 }}>
             <span className="eyebrow">Kind words</span>
             <h2 style={{ font: "500 36px/1 'Playfair Display',serif", color: "var(--ink)", margin: "8px 0 0" }}>What locals say</h2>
