@@ -34,3 +34,6 @@ yarn-error.log*
 
 # local embedded Postgres (PGlite dev fallback)
 /.pglite
+
+# local product images for bulk import (see scripts/import-product-images.mjs)
+/product-images
