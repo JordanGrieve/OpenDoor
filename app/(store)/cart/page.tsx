@@ -46,7 +46,7 @@ export default function CartPage() {
           </Link>
         </div>
       ) : (
-        <div className="grid-2cols" style={{ gridTemplateColumns: "1.5fr .9fr", gap: 28, alignItems: "start" }}>
+        <div className="cart-grid">
           {/* items */}
           <div>
             <div className="card" style={{ padding: "8px 24px" }}>

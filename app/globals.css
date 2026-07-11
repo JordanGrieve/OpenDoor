@@ -253,6 +253,23 @@ a {
   }
 }
 
+/* Cart: items + summary side-by-side, stacking on mobile */
+.cart-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 0.9fr;
+  gap: 28px;
+  align-items: start;
+}
+@media (max-width: 768px) {
+  .cart-grid {
+    grid-template-columns: 1fr;
+  }
+  /* summary shouldn't stick once it's stacked under the items */
+  .cart-grid > :last-child {
+    position: static !important;
+  }
+}
+
 /* Newsletter: stack input + button on small screens */
 @media (max-width: 560px) {
   .newsletter-form {
