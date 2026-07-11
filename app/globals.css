@@ -253,6 +253,14 @@ a {
   }
 }
 
+/* PDP: image column is sticky beside the details on desktop, but must
+   flow normally on mobile (otherwise it follows the scroll) */
+@media (max-width: 768px) {
+  .pdp-media {
+    position: static !important;
+  }
+}
+
 /* Cart: items + summary side-by-side, stacking on mobile */
 .cart-grid {
   display: grid;

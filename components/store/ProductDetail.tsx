@@ -58,7 +58,7 @@ export default function ProductDetail({ product }: { product: Product }) {
       </Link>
       <div className="grid-2cols" style={{ gap: 50, alignItems: "start" }}>
         {/* Gallery */}
-        <div style={{ position: "sticky", top: 90 }}>
+        <div className="pdp-media" style={{ position: "sticky", top: 90 }}>
           <div className="sheen" style={{ position: "relative", aspectRatio: "1", borderRadius: 28, overflow: "hidden", boxShadow: "0 30px 56px -30px rgba(120,80,40,.5)" }}>
             <ProductPhoto url={galleryUrls[activeImg]} category={product.category} alt={product.name} />
             <span style={{ position: "absolute", top: 14, right: 14, background: "var(--ink)", color: "#f3e7d6", font: "600 11px Mulish", padding: "6px 12px", borderRadius: 999, zIndex: 1 }}>
