@@ -42,7 +42,7 @@ export default function Newsletter() {
               Thank you — you&apos;re on the list. 🥐
             </div>
           ) : (
-            <form onSubmit={submit} style={{ margin: "26px auto 0", maxWidth: 440, display: "flex", gap: 10 }}>
+            <form onSubmit={submit} className="newsletter-form" style={{ margin: "26px auto 0", maxWidth: 440, display: "flex", gap: 10 }}>
               <input
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

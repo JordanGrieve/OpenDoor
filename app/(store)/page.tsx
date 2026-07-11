@@ -88,7 +88,7 @@ export default async function HomePage() {
           </div>
           <Link href="/shop" style={{ font: "600 14px Mulish", color: "var(--accent-deep)" }}>View all →</Link>
         </div>
-        <div className="grid-4cols">
+        <div className="grid-cats">
           {categoryCards.map((c) => (
             <Link
               key={c.label}
@@ -112,7 +112,7 @@ export default async function HomePage() {
           <span className="eyebrow">Loved by locals</span>
           <h2 style={{ font: "500 36px/1 'Playfair Display',serif", color: "var(--ink)", margin: "8px 0 0" }}>Bestselling boxes</h2>
         </div>
-        <div className="grid-products">
+        <div className="row-carousel cols-3">
           {best.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
@@ -144,7 +144,7 @@ export default async function HomePage() {
           <span className="eyebrow">Getting your box</span>
           <h2 style={{ font: "500 36px/1 'Playfair Display',serif", color: "var(--ink)", margin: "8px 0 0" }}>Collection &amp; local delivery</h2>
         </div>
-        <div className="grid-2cols">
+        <div className="row-carousel cols-2">
           <div className="card" style={{ padding: 32 }}>
             <div style={{ width: 48, height: 48, borderRadius: 14, background: "var(--blush-soft)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>🏡</div>
             <h3 style={{ font: "500 24px 'Playfair Display',serif", color: "var(--ink)", margin: "18px 0 0" }}>Collection</h3>
@@ -171,7 +171,7 @@ export default async function HomePage() {
             <span className="eyebrow">Kind words</span>
             <h2 style={{ font: "500 36px/1 'Playfair Display',serif", color: "var(--ink)", margin: "8px 0 0" }}>What locals say</h2>
           </div>
-          <div className="grid-3cols">
+          <div className="row-carousel cols-3">
             {displayReviews.map((r) => (
               <div key={r.name} className="card" style={{ padding: 28 }}>
                 <div style={{ color: "var(--accent)", fontSize: 15, letterSpacing: 2 }}>{"★".repeat(r.stars)}{"☆".repeat(5 - r.stars)}</div>

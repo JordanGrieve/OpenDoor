@@ -55,6 +55,23 @@ a {
   }
 }
 
+@keyframes drawerin {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes overlayin {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .pbfade {
   animation: pbfade 0.5s ease;
 }
@@ -190,6 +207,82 @@ a {
     gap: 12px;
   }
 }
+
+/* Category cards: 4 → 2 columns, staying 2-up on mobile */
+.grid-cats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+@media (max-width: 900px) {
+  .grid-cats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Rows that become a horizontal scroll-snap carousel on mobile */
+.row-carousel {
+  display: grid;
+  gap: 22px;
+}
+.row-carousel.cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.row-carousel.cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+@media (max-width: 768px) {
+  .row-carousel {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 14px;
+    margin: 0 -24px;
+    padding: 4px 24px 10px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .row-carousel::-webkit-scrollbar {
+    display: none;
+  }
+  .row-carousel > * {
+    flex: 0 0 82%;
+    scroll-snap-align: start;
+  }
+}
+
+/* Newsletter: stack input + button on small screens */
+@media (max-width: 560px) {
+  .newsletter-form {
+    flex-direction: column;
+  }
+  .newsletter-form > * {
+    width: 100%;
+  }
+}
+
+/* Footer: accordion on mobile, always-open on desktop */
+@media (max-width: 768px) {
+  .footer-acc-body {
+    display: none;
+  }
+  .footer-acc-body[data-open="true"] {
+    display: flex;
+  }
+}
+@media (min-width: 769px) {
+  .footer-acc-body {
+    display: flex !important;
+  }
+  .footer-acc-icon {
+    display: none;
+  }
+  .footer-acc-head {
+    cursor: default !important;
+    pointer-events: none;
+  }
+}
 @media (max-width: 768px) {
   .grid-2cols {
     grid-template-columns: 1fr;
@@ -219,7 +312,8 @@ a {
 }
 @media (max-width: 768px) {
   .footer-grid {
-    grid-template-columns: 1fr 1fr !important;
+    grid-template-columns: 1fr !important;
+    gap: 4px !important;
   }
   .gallery-cols {
     columns: 2 !important;
