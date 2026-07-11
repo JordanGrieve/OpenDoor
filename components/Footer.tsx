@@ -38,7 +38,7 @@ export default function Footer() {
     <footer style={{ background: "var(--ink)", color: "#d8c7b2", marginTop: 20 }}>
       <div className="wrap footer-grid" style={{ padding: "64px 24px 30px", display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr 1fr", gap: 40 }}>
         <div style={{ paddingBottom: 8 }}>
-          <span style={{ font: "500 20px 'Playfair Display',serif", color: "#fbf3e6" }}>Open Door</span>
+          <span style={{ font: "500 20px 'Playfair Display',serif", color: "#fbf3e6" }}>Open Door Bakery</span>
           <p style={{ font: "400 14px/1.7 Mulish", color: "#b3a18d", margin: "16px 0 0", maxWidth: 280 }}>
             Handmade pastries and celebration boxes, baked fresh in Hamilton. Collection &amp; local delivery across Lanarkshire.
           </p>

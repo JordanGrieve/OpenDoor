@@ -41,7 +41,7 @@ export default async function HomePage() {
         className="grid-2cols"
         style={{
           background: "linear-gradient(135deg,#f6efe3,#efe5d3)",
-          padding: "120px 24px",
+          padding: "80px 24px",
           minHeight: 600,
           display: "flex",
           alignItems: "center",

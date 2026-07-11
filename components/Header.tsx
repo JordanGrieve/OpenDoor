@@ -81,9 +81,13 @@ export default function Header() {
             onClick={() => setOpen((o) => !o)}
             aria-label="Menu"
             data-mobile-burger
-            style={{ background: "none", border: "none", cursor: "pointer", padding: 8, color: "var(--ink)", fontSize: 24, display: "none" }}
+            style={{ background: "none", border: "none", cursor: "pointer", padding: 8, color: "var(--ink)", display: "none", lineHeight: 0 }}
           >
-            ☰
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
           </button>
 
           <nav data-desktop-nav style={{ display: "flex", alignItems: "center", gap: 30 }}>
@@ -175,7 +179,7 @@ export default function Header() {
                 key={n.href}
                 href={n.href}
                 onClick={() => setOpen(false)}
-                style={{ padding: "13px 0", font: "600 16px Mulish", color: isActive(n.href) ? "var(--accent-deep)" : "var(--ink)", borderBottom: "1px solid var(--line)" }}
+                style={{ padding: "13px 0", font: "600 16px Mulish", color: isActive(n.href) ? "var(--accent-deep)" : "var(--ink)" }}
               >
                 {n.label}
               </Link>
@@ -186,7 +190,7 @@ export default function Header() {
               className="btn btn-primary"
               style={{ marginTop: 18, padding: 14, textAlign: "center", fontSize: 15, borderRadius: 12 }}
             >
-              🛍 View Cart {ready && count > 0 ? `(${count})` : ""}
+              View Cart {ready && count > 0 ? `(${count})` : ""}
             </Link>
           </aside>
         </>
