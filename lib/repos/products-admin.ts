@@ -29,6 +29,8 @@ export interface ProductInput {
   celebration: boolean;
   metaTitle: string | null;
   metaDescription: string | null;
+  deliveryInfo: string | null;
+  storageInfo: string | null;
   allergenIds: number[];
   variants: VariantInput[];
 }
@@ -62,9 +64,9 @@ export async function listAllProducts(): Promise<
 
 export async function createProduct(input: ProductInput): Promise<Product | null> {
   const rows = (await sql`
-    INSERT INTO products (slug, name, description, category, price, lead_time_days, celebration, meta_title, meta_description)
+    INSERT INTO products (slug, name, description, category, price, lead_time_days, celebration, meta_title, meta_description, delivery_info, storage_info)
     VALUES (${input.slug}, ${input.name}, ${input.description}, ${input.category}, ${input.price},
-            ${input.leadTimeDays}, ${input.celebration}, ${input.metaTitle}, ${input.metaDescription})
+            ${input.leadTimeDays}, ${input.celebration}, ${input.metaTitle}, ${input.metaDescription}, ${input.deliveryInfo}, ${input.storageInfo})
     RETURNING id
   `) as Row[];
   const id = Number(rows[0].id);
@@ -79,7 +81,8 @@ export async function updateProduct(id: number, input: ProductInput): Promise<Pr
       slug = ${input.slug}, name = ${input.name}, description = ${input.description},
       category = ${input.category}, price = ${input.price}, lead_time_days = ${input.leadTimeDays},
       celebration = ${input.celebration}, meta_title = ${input.metaTitle},
-      meta_description = ${input.metaDescription}, updated_at = now()
+      meta_description = ${input.metaDescription}, delivery_info = ${input.deliveryInfo},
+      storage_info = ${input.storageInfo}, updated_at = now()
     WHERE id = ${id}
   `;
   await setAllergens(id, input.allergenIds);

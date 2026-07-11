@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Allergen, Ingredient, Product } from "@/lib/types";
 import { prettyDate } from "@/lib/dates";
+import { DEFAULT_DELIVERY_INFO, DEFAULT_STORAGE_INFO } from "@/lib/product-copy";
 
 interface RecipeRow { ingredientId: number; amount: number }
 interface VariantRow { id?: number; label: string; price: number; stockLimit: number | null; recipe: RecipeRow[] }
@@ -24,6 +25,8 @@ export default function ProductEditor({ mode, productId }: { mode: "new" | "edit
   const [celebration, setCelebration] = useState(false);
   const [metaTitle, setMetaTitle] = useState("");
   const [metaDescription, setMetaDescription] = useState("");
+  const [deliveryInfo, setDeliveryInfo] = useState("");
+  const [storageInfo, setStorageInfo] = useState("");
   const [allergenIds, setAllergenIds] = useState<number[]>([]);
   const [variants, setVariants] = useState<VariantRow[]>([]);
 
@@ -67,6 +70,8 @@ export default function ProductEditor({ mode, productId }: { mode: "new" | "edit
       setCelebration(p.celebration);
       setMetaTitle(p.metaTitle ?? "");
       setMetaDescription(p.metaDescription ?? "");
+      setDeliveryInfo(p.deliveryInfo ?? "");
+      setStorageInfo(p.storageInfo ?? "");
       setAllergenIds(p.allergens.map((a) => a.id));
       setVariants(
         p.variants.map((v) => ({ id: v.id, label: v.label, price: v.price, stockLimit: v.stockLimit, recipe: recipes[v.id] ?? [] }))
@@ -103,7 +108,7 @@ export default function ProductEditor({ mode, productId }: { mode: "new" | "edit
     setError("");
     if (!name.trim()) return setError("Name is required.");
     setSaving(true);
-    const payload = { name, slug, description, category, price, leadTimeDays, celebration, metaTitle, metaDescription, allergenIds, variants };
+    const payload = { name, slug, description, category, price, leadTimeDays, celebration, metaTitle, metaDescription, deliveryInfo, storageInfo, allergenIds, variants };
     const res =
       mode === "new"
         ? await fetch("/api/admin/products", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
@@ -211,6 +216,19 @@ export default function ProductEditor({ mode, productId }: { mode: "new" | "edit
             );
           })}
         </div>
+      </Card>
+
+      {/* PDP accordion copy */}
+      <Card title="Product page details">
+        <p style={{ font: "400 12.5px/1.6 Mulish", color: "var(--muted)", margin: "0 0 14px" }}>
+          These show as the drop-down sections on the product page. Leave a field blank to use the default site-wide text (shown as the placeholder). Allergens are set in the section above.
+        </p>
+        <F label="Collection & delivery">
+          <textarea className="field" rows={3} value={deliveryInfo} onChange={(e) => setDeliveryInfo(e.target.value)} placeholder={DEFAULT_DELIVERY_INFO} style={{ resize: "vertical" }} />
+        </F>
+        <F label="Storage & freshness">
+          <textarea className="field" rows={3} value={storageInfo} onChange={(e) => setStorageInfo(e.target.value)} placeholder={DEFAULT_STORAGE_INFO} style={{ resize: "vertical" }} />
+        </F>
       </Card>
 
       {/* Variants + recipes */}

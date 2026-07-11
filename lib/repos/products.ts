@@ -159,6 +159,8 @@ function mapProduct(r: Row): Product {
     celebration: Boolean(r.celebration),
     metaTitle: (r.meta_title as string) ?? null,
     metaDescription: (r.meta_description as string) ?? null,
+    deliveryInfo: (r.delivery_info as string) ?? null,
+    storageInfo: (r.storage_info as string) ?? null,
     archived: Boolean(r.archived),
     variants: mapVariants(r.variants, id),
     images: mapImages(r.images, id),

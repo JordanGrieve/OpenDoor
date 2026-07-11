@@ -12,6 +12,8 @@ export function normalizeProductInput(b: Partial<ProductInput>): ProductInput {
     celebration: Boolean(b.celebration),
     metaTitle: b.metaTitle?.trim() || null,
     metaDescription: b.metaDescription?.trim() || null,
+    deliveryInfo: b.deliveryInfo?.trim() || null,
+    storageInfo: b.storageInfo?.trim() || null,
     allergenIds: Array.isArray(b.allergenIds) ? b.allergenIds.map(Number) : [],
     variants: Array.isArray(b.variants)
       ? b.variants

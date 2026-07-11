@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Product } from "@/lib/types";
 import { formatGBP } from "@/lib/money";
+import { DEFAULT_DELIVERY_INFO, DEFAULT_STORAGE_INFO } from "@/lib/product-copy";
 import ProductPhoto from "@/components/store/ProductPhoto";
 import { useCart } from "@/components/cart/CartContext";
 
@@ -167,8 +168,7 @@ export default function ProductDetail({ product }: { product: Product }) {
           {/* accordions */}
           <div style={{ marginTop: 26, borderTop: "1px solid var(--line)" }}>
             <Accordion title="Collection & delivery">
-              Freshly baked to order. Collect from our Hamilton kitchen Tue–Sun, or choose local delivery within about
-              8 miles (Motherwell, Bothwell, Blantyre, East Kilbride &amp; more) — free over £40, otherwise £4.50. Order before 4pm for next day.
+              {product.deliveryInfo || DEFAULT_DELIVERY_INFO}
             </Accordion>
             <Accordion title="Allergens">
               {product.allergens.length
@@ -176,8 +176,7 @@ export default function ProductDetail({ product }: { product: Product }) {
                 : "Please ask about allergens — everything is made in a small kitchen that handles gluten, dairy, egg and nuts."}
             </Accordion>
             <Accordion title="Storage & freshness">
-              Best enjoyed the day of collection or delivery. Keep in a cool dry place; cakes and tarts in the fridge. Most
-              bakes freeze beautifully for up to a month.
+              {product.storageInfo || DEFAULT_STORAGE_INFO}
             </Accordion>
           </div>
         </div>

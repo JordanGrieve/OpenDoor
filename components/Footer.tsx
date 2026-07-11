@@ -17,10 +17,10 @@ function Section({ title, children }: { title: string; children: React.ReactNode
       <button
         className="footer-acc-head"
         onClick={() => setOpen((o) => !o)}
-        style={{ ...HEAD, background: "none", border: "none", padding: "14px 0", width: "100%", textAlign: "left", cursor: "pointer" }}
+        style={{ ...HEAD, background: "none", border: "none", padding: "14px 0", width: "100%", textAlign: "left", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}
       >
         <span>{title}</span>
-        <span className="footer-acc-icon" style={{ color: "#9c8a78", fontSize: 18 }}>{open ? "–" : "+"}</span>
+        <span className="footer-acc-icon" style={{ color: "var(--accent)", fontSize: 18, lineHeight: 1 }}>{open ? "–" : "+"}</span>
       </button>
       <div
         className="footer-acc-body"

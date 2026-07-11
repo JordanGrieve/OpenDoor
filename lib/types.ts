@@ -61,6 +61,8 @@ export interface Product {
   celebration: boolean;
   metaTitle: string | null;
   metaDescription: string | null;
+  deliveryInfo: string | null;
+  storageInfo: string | null;
   archived: boolean;
   variants: ProductVariant[];
   images: ProductImage[];
