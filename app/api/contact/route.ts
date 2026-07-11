@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 // signups (email only) still just notify the owner by email.
 const POSTBOX_URL = () =>
   process.env.POSTBOX_TICKET_URL ||
-  "https://postbox.help/api/tickets/cli_62a7282f3eb197a5bbaa6189257ff22b";
+  "https://postbox.help/api/tickets/cli_c34f25ddd727e0350cb2e700351f7929";
 const OWNER_EMAIL = () => process.env.OWNER_EMAIL || process.env.EMAIL_FROM || "hello@thepastrybox.co.uk";
 
 interface Intake {
