@@ -273,6 +273,17 @@ a {
   }
 }
 
+/* Contact: form + info side-by-side, stacking on mobile */
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+}
+@media (max-width: 768px) {
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Cart: items + summary side-by-side, stacking on mobile */
 .cart-grid {
   display: grid;

@@ -63,7 +63,7 @@ export default function ContactPage() {
         </p>
       </div>
 
-      <div className="grid-2cols" style={{ gridTemplateColumns: "1.15fr .85fr", gap: 30, alignItems: "start" }}>
+      <div className="contact-grid" style={{ gap: 30, alignItems: "start" }}>
         <div className="card" style={{ padding: 36, borderRadius: 26 }}>
           {done ? (
             <div style={{ textAlign: "center", padding: "30px 10px" }}>
