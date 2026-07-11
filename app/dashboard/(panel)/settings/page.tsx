@@ -109,7 +109,7 @@ export default function SettingsPage() {
           ))}
         </div>
         <div style={{ display: "flex", gap: 8, maxWidth: 320 }}>
-          <input className="field" placeholder="HG1" value={newPrefix} onChange={(e) => setNewPrefix(e.target.value)} />
+          <input className="field" placeholder="ML3" value={newPrefix} onChange={(e) => setNewPrefix(e.target.value)} />
           <button onClick={addPostcode} className="btn btn-primary" style={{ padding: "0 18px", fontSize: 13, borderRadius: 12 }}>Add</button>
         </div>
       </div>

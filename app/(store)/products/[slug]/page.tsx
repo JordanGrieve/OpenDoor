@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getProductBySlug } from "@/lib/repos/products";
 import ProductDetail from "@/components/store/ProductDetail";
+import JsonLd from "@/components/seo/JsonLd";
+import { productJsonLd } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -28,5 +30,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const { slug } = await params;
   const product = await getProductBySlug(slug);
   if (!product || product.archived) notFound();
-  return <ProductDetail product={product} />;
+  return (
+    <>
+      <JsonLd data={productJsonLd(product)} />
+      <ProductDetail product={product} />
+    </>
+  );
 }

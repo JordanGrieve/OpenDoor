@@ -2,8 +2,8 @@
 import { useState } from "react";
 
 const FAQS = [
-  { q: "How does local delivery work?", a: "We deliver within 8 miles of Harrogate. Order before 4pm for next-day delivery, with a one-hour arrival window. Delivery is free over £40, otherwise £4.50." },
-  { q: "Where and when can I collect?", a: "Collect from our kitchen at Montpellier Mews, Harrogate, Tuesday to Sunday between 8am and 2pm. We'll have your box ready at your chosen time." },
+  { q: "How does local delivery work?", a: "We deliver within about 8 miles of Hamilton — including Motherwell, Wishaw, Bellshill, Bothwell, Blantyre, Larkhall, Coatbridge and East Kilbride. Order before 4pm for next-day delivery, with a one-hour arrival window. Delivery is free over £40, otherwise £4.50." },
+  { q: "Where and when can I collect?", a: "Collect from our kitchen in Hamilton (ML3), Tuesday to Sunday. We'll confirm the exact address and have your box ready at your chosen time." },
   { q: "Can you cater for allergies?", a: "Yes — most bakes can be adapted and we offer gluten-free options on selected items. Everything is made in a small kitchen that handles gluten, dairy, egg and nuts, so we can't guarantee zero traces. Just ask." },
   { q: "How do custom orders work?", a: "Send an enquiry with your date, numbers and ideas. Emma replies personally, you confirm the details, and only then do we take payment." },
   { q: "How much notice do you need?", a: "At least 5 days for celebration cakes and boxes, and around 2 weeks for larger event orders. For everyday items, order by 4pm for next day." },
@@ -93,8 +93,8 @@ export default function ContactPage() {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <InfoCard title="Reach us">
-            <div style={{ font: "500 16px Mulish", color: "var(--ink)", marginTop: 12 }}>hello@thepastrybox.co.uk</div>
-            <div style={{ font: "500 16px Mulish", color: "var(--ink)", marginTop: 6 }}>01423 000 000</div>
+            <div style={{ font: "500 16px Mulish", color: "var(--ink)", marginTop: 12 }}>hello@opendoorbakery.com</div>
+            <div style={{ font: "400 13.5px Mulish", color: "var(--muted)", marginTop: 6 }}>We reply within one working day</div>
           </InfoCard>
           <InfoCard title="Order & collection times">
             <div style={{ font: "400 14.5px/1.9 Mulish", color: "#6c5a4a", marginTop: 10 }}>
@@ -103,7 +103,7 @@ export default function ContactPage() {
           </InfoCard>
           <InfoCard title="Find us">
             <div style={{ font: "400 14.5px/1.7 Mulish", color: "#6c5a4a", marginTop: 10 }}>
-              The Pastry Box Kitchen<br />Montpellier Mews, Harrogate HG1
+              Open Door Bakery<br />Hamilton, Glasgow · ML3 7PD
             </div>
           </InfoCard>
         </div>

@@ -164,11 +164,11 @@ export default function CheckoutClient() {
               <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 12 }}>
                 <div>
                   <label className="field-label">Delivery address</label>
-                  <textarea className="field" rows={3} placeholder="12 Montpellier Parade" value={address} onChange={(e) => setAddress(e.target.value)} style={{ resize: "vertical" }} />
+                  <textarea className="field" rows={3} placeholder="12 Cadzow Street, Hamilton" value={address} onChange={(e) => setAddress(e.target.value)} style={{ resize: "vertical" }} />
                 </div>
                 <div>
                   <label className="field-label">Postcode</label>
-                  <input className="field" placeholder="HG1 2TG" value={postcode} onChange={(e) => setPostcode(e.target.value)} />
+                  <input className="field" placeholder="ML3 7PD" value={postcode} onChange={(e) => setPostcode(e.target.value)} />
                   {settings && (
                     <p style={{ font: "400 12px Mulish", color: "var(--muted)", marginTop: 6 }}>
                       We deliver within {settings.radiusMiles} miles of {settings.originPostcode}.

@@ -2,12 +2,13 @@ import Link from "next/link";
 import { getProductSummaries } from "@/lib/repos/products";
 import ProductCard from "@/components/store/ProductCard";
 import Newsletter from "@/components/store/Newsletter";
+import ShareForm from "@/components/store/ShareForm";
 import { tileBackground } from "@/lib/theme";
 
 export const dynamic = "force-dynamic";
 
 const REVIEWS = [
-  { name: "Hannah W.", role: "Harrogate", text: "The celebration box for my mum's birthday was unreal. Beautifully boxed and tasted even better than it looked." },
+  { name: "Hannah W.", role: "Hamilton", text: "The celebration box for my mum's birthday was unreal. Beautifully boxed and tasted even better than it looked." },
   { name: "Tom & Priya", role: "Collected weekly", text: "We get the morning pastry box most Saturdays now. The almond croissants alone are worth the trip." },
   { name: "Sarah J.", role: "Local delivery", text: "Emma made a dessert table for our wedding and it stole the show. So thoughtful, so generous, so good." },
 ];
@@ -120,7 +121,7 @@ export default async function HomePage() {
               A little kitchen, a lot of love
             </h2>
             <p style={{ font: "400 16.5px/1.75 Mulish", color: "#6c5a4a", margin: "18px 0 0", maxWidth: 560 }}>
-              Emma trained in patisserie in Paris before coming home to Harrogate to bake the things she loves most.
+              Emma trained in patisserie in Paris before coming home to Hamilton to bake the things she loves most.
               Everything is made by hand in small batches — laminated dough rested overnight, brownies pulled gooey from
               the oven, cakes finished to order.
             </p>
@@ -140,7 +141,7 @@ export default async function HomePage() {
             <div style={{ width: 48, height: 48, borderRadius: 14, background: "var(--blush-soft)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>🏡</div>
             <h3 style={{ font: "500 24px 'Playfair Display',serif", color: "var(--ink)", margin: "18px 0 0" }}>Collection</h3>
             <p style={{ font: "400 15px/1.7 Mulish", color: "#6c5a4a", margin: "10px 0 0" }}>
-              Collect fresh from our kitchen door in central Harrogate, Tuesday to Sunday, 8am–2pm.
+              Collect fresh from our kitchen in Hamilton (ML3), Tuesday to Sunday. We&apos;ll confirm the address with your order.
             </p>
             <div style={{ font: "600 13px Mulish", color: "var(--accent-deep)", marginTop: 14 }}>Always free</div>
           </div>
@@ -148,7 +149,7 @@ export default async function HomePage() {
             <div style={{ width: 48, height: 48, borderRadius: 14, background: "var(--blush-soft)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>🚲</div>
             <h3 style={{ font: "500 24px 'Playfair Display',serif", color: "var(--ink)", margin: "18px 0 0" }}>Local delivery</h3>
             <p style={{ font: "400 15px/1.7 Mulish", color: "#6c5a4a", margin: "10px 0 0" }}>
-              We deliver within 8 miles of Harrogate. Order before 4pm for next-day delivery.
+              We deliver within about 8 miles of Hamilton — Motherwell, Bothwell, Blantyre, East Kilbride &amp; more. Order before 4pm for next-day.
             </p>
             <div style={{ font: "600 13px Mulish", color: "var(--accent-deep)", marginTop: 14 }}>Free over £40 · otherwise £4.50</div>
           </div>
@@ -175,6 +176,16 @@ export default async function HomePage() {
                 </div>
               </div>
             ))}
+          </div>
+          <div style={{ textAlign: "center", marginTop: 30 }}>
+            <ShareForm
+              kind="review"
+              withRating
+              buttonLabel="Leave a review"
+              heading="Leave a review"
+              blurb="Ordered from us? We'd love to hear how it went."
+              messagePlaceholder="Tell us what you thought…"
+            />
           </div>
         </div>
       </section>

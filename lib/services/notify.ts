@@ -65,7 +65,7 @@ function emailShell(order: Order, heading: string, intro: string): string {
       ${order.deliveryFee > 0 ? `<tr><td>Delivery</td><td style="text-align:right;">${formatGBP(order.deliveryFee)}</td></tr>` : ""}
       <tr><td style="padding:6px 0;font-weight:bold;">Total</td><td style="padding:6px 0;text-align:right;font-weight:bold;">${formatGBP(order.total)}</td></tr>
     </table>
-    <p style="font-size:12px;color:#9c8a78;margin-top:20px;">Reply to this email and it'll reach us about this order. Open Door Bakery, Harrogate.</p>
+    <p style="font-size:12px;color:#9c8a78;margin-top:20px;">Reply to this email and it'll reach us about this order. Open Door Bakery, Hamilton.</p>
   </div>`;
 }
 

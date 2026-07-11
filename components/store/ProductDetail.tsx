@@ -167,8 +167,8 @@ export default function ProductDetail({ product }: { product: Product }) {
           {/* accordions */}
           <div style={{ marginTop: 26, borderTop: "1px solid var(--line)" }}>
             <Accordion title="Collection & delivery">
-              Freshly baked to order. Collect from our Harrogate kitchen Tue–Sun, 8am–2pm, or choose local delivery within
-              8 miles — free over £40, otherwise £4.50. Order before 4pm for next day.
+              Freshly baked to order. Collect from our Hamilton kitchen Tue–Sun, or choose local delivery within about
+              8 miles (Motherwell, Bothwell, Blantyre, East Kilbride &amp; more) — free over £40, otherwise £4.50. Order before 4pm for next day.
             </Accordion>
             <Accordion title="Allergens">
               {product.allergens.length

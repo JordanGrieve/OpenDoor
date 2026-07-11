@@ -10,10 +10,10 @@ export const dynamic = "force-dynamic";
 const POSTBOX_URL = () =>
   process.env.POSTBOX_TICKET_URL ||
   "https://postbox.help/api/tickets/cli_c34f25ddd727e0350cb2e700351f7929";
-const OWNER_EMAIL = () => process.env.OWNER_EMAIL || process.env.EMAIL_FROM || "hello@thepastrybox.co.uk";
+const OWNER_EMAIL = () => process.env.OWNER_EMAIL || process.env.EMAIL_FROM || "hello@opendoorbakery.com";
 
 interface Intake {
-  kind?: "contact" | "custom" | "newsletter";
+  kind?: "contact" | "custom" | "newsletter" | "photo" | "review";
   name?: string;
   email?: string;
   phone?: string;
@@ -23,6 +23,8 @@ interface Intake {
   type?: string;
   people?: string;
   fulfilment?: string;
+  // review
+  rating?: number;
 }
 
 interface PostboxResult {
@@ -85,10 +87,22 @@ export async function POST(req: Request) {
     if (!email) return NextResponse.json({ error: "Please enter your email." }, { status: 400 });
     if (!data.message?.trim()) return NextResponse.json({ error: "Please enter a message." }, { status: 400 });
 
-    const payload =
-      kind === "custom"
-        ? { name, email, subject: `Custom order enquiry — ${data.type || "general"}`, message: customMessage(data) }
-        : { name, email, subject: "Website contact form", message: data.message.trim() };
+    let subject: string;
+    let message: string;
+    if (kind === "custom") {
+      subject = `Custom order enquiry — ${data.type || "general"}`;
+      message = customMessage(data);
+    } else if (kind === "photo") {
+      subject = `Photo submission — ${name}`;
+      message = `Gallery photo submission request.\n\n${data.message.trim()}`;
+    } else if (kind === "review") {
+      subject = `Customer review — ${data.rating ? `${data.rating}★` : "no rating"}`;
+      message = `Rating: ${data.rating ?? "—"}/5\n\n${data.message.trim()}`;
+    } else {
+      subject = "Website contact form";
+      message = data.message.trim();
+    }
+    const payload = { name, email, subject, message };
 
     const result = await createTicket(payload);
 

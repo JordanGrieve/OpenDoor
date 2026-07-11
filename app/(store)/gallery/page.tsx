@@ -2,12 +2,13 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { getProductSummaries } from "@/lib/repos/products";
 import { tileBackground } from "@/lib/theme";
+import ShareForm from "@/components/store/ShareForm";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Gallery",
-  description: "Pastries, cakes, boxes and flour-dusted moments from the Open Door kitchen in Harrogate.",
+  description: "Pastries, cakes, boxes and flour-dusted moments from the Open Door Bakery kitchen in Hamilton.",
 };
 
 const HEIGHTS = [260, 360, 230, 300, 250, 280, 300, 240, 250, 270, 230, 290];
@@ -59,6 +60,22 @@ export default async function GalleryPage() {
         <Link href="/custom" className="btn btn-primary" style={{ display: "inline-block", marginTop: 22, padding: "14px 30px", fontSize: 15 }}>
           Enquire about a custom order →
         </Link>
+      </div>
+
+      {/* Submit a photo */}
+      <div style={{ textAlign: "center", marginTop: 40 }}>
+        <span className="eyebrow">Share the love</span>
+        <h2 style={{ font: "500 28px 'Playfair Display',serif", color: "var(--ink)", margin: "8px 0 6px" }}>Baked with us? Send us your photo</h2>
+        <p style={{ font: "400 15px/1.6 Mulish", color: "#6c5a4a", margin: "0 auto 20px", maxWidth: 440 }}>
+          We&apos;d love to feature your Open Door bakes in the gallery. Request to submit a photo and we&apos;ll be in touch.
+        </p>
+        <ShareForm
+          kind="photo"
+          buttonLabel="Submit a photo"
+          heading="Share your photo"
+          blurb="Send us a note and we'll reply to arrange featuring your photo in the gallery."
+          messagePlaceholder="Tell us about your photo — what did you order, and when?"
+        />
       </div>
     </main>
   );

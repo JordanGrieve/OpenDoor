@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import JsonLd from "@/components/seo/JsonLd";
+import { bakeryJsonLd } from "@/lib/seo";
 import "./globals.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -6,17 +8,28 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Open Door Bakery — Handmade pastries & celebration boxes, Harrogate",
+    default: "Open Door Bakery — Handmade pastries & celebration boxes in Hamilton",
     template: "%s | Open Door Bakery",
   },
   description:
-    "Fresh handmade pastries, cakes, brownies, tarts and celebration boxes — baked with care in Harrogate. Collection and local delivery available daily.",
+    "Fresh handmade pastries, cakes, brownies, tarts and celebration boxes — baked with care in Hamilton, near Glasgow. Collection and local delivery across Hamilton, Motherwell, Bothwell, Blantyre & East Kilbride.",
+  keywords: [
+    "Hamilton bakery",
+    "bakery Hamilton",
+    "cakes Hamilton",
+    "celebration cakes Hamilton",
+    "pastries Hamilton",
+    "bakery near me Hamilton",
+    "Lanarkshire bakery",
+    "cake delivery Hamilton",
+  ],
   openGraph: {
-    title: "Open Door Bakery",
+    title: "Open Door Bakery — Hamilton",
     description:
-      "Handmade pastries and celebration boxes, baked fresh in Harrogate. Collection & local delivery.",
+      "Handmade pastries and celebration boxes, baked fresh in Hamilton. Collection & local delivery across Lanarkshire.",
     type: "website",
     url: SITE_URL,
+    locale: "en_GB",
   },
 };
 
@@ -31,7 +44,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body suppressHydrationWarning>{children}</body>
+      <body suppressHydrationWarning>
+        <JsonLd data={bakeryJsonLd()} />
+        {children}
+      </body>
     </html>
   );
 }

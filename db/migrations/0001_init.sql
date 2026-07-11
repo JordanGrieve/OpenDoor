@@ -192,7 +192,7 @@ CREATE TABLE IF NOT EXISTS settings (
   id                SMALLINT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
   delivery_fee      NUMERIC(10,2) NOT NULL DEFAULT 4.50,
   free_delivery_min NUMERIC(10,2) NOT NULL DEFAULT 40.00,
-  origin_postcode   TEXT NOT NULL DEFAULT 'HG1',
+  origin_postcode   TEXT NOT NULL DEFAULT 'ML3 7PD',
   radius_miles      NUMERIC(5,1) NOT NULL DEFAULT 8.0
 );
 

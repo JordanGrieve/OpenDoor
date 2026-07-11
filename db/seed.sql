@@ -4,7 +4,7 @@
 
 -- ── Settings singleton ─────────────────────────────────────────
 INSERT INTO settings (id, delivery_fee, free_delivery_min, origin_postcode, radius_miles)
-VALUES (1, 4.50, 40.00, 'HG1', 8.0)
+VALUES (1, 4.50, 40.00, 'ML3 7PD', 8.0)
 ON CONFLICT (id) DO NOTHING;
 
 -- ── Allergens ──────────────────────────────────────────────────
@@ -28,9 +28,11 @@ INSERT INTO collection_slots (slot_time, label, active, sort_order) VALUES
 ON CONFLICT DO NOTHING;
 
 -- ── Delivery postcodes ─────────────────────────────────────────
+-- ~8-mile delivery area around Hamilton (ML3) — outward-code districts.
 INSERT INTO delivery_postcodes (prefix, active) VALUES
-  ('HG1', TRUE), ('HG2', TRUE), ('HG3', TRUE),
-  ('LS21', TRUE), ('YO51', TRUE), ('BD23', TRUE)
+  ('ML1', TRUE), ('ML2', TRUE), ('ML3', TRUE), ('ML4', TRUE), ('ML5', TRUE),
+  ('ML6', TRUE), ('ML9', TRUE), ('ML10', TRUE),
+  ('G71', TRUE), ('G72', TRUE), ('G73', TRUE), ('G74', TRUE), ('G75', TRUE)
 ON CONFLICT (prefix) DO NOTHING;
 
 -- ── Ingredients (with shopping-list category) ──────────────────
@@ -55,7 +57,7 @@ INSERT INTO products (slug, name, description, category, price, lead_time_days, 
     'All-butter dough, laminated over three days for a shatter-crisp shell and soft, honeycombed middle.',
     'Croissants', 3.20, 1, FALSE,
     'Classic Butter Croissant | Open Door Bakery',
-    'Hand-laminated all-butter croissants, baked fresh in Harrogate.'),
+    'Hand-laminated all-butter croissants, baked fresh in Hamilton.'),
   ('almond-croissant', 'Almond Croissant',
     'Day-old croissant reborn — soaked in syrup, filled with frangipane, dusted in icing sugar.',
     'Croissants', 3.80, 1, FALSE,

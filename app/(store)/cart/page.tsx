@@ -17,7 +17,7 @@ export default function CartPage() {
     fetch("/api/settings/delivery")
       .then((r) => r.json())
       .then((d) => setSettings(d))
-      .catch(() => setSettings({ deliveryFee: 4.5, freeDeliveryMin: 40, originPostcode: "HG1", radiusMiles: 8 }));
+      .catch(() => setSettings({ deliveryFee: 4.5, freeDeliveryMin: 40, originPostcode: "ML3 7PD", radiusMiles: 8 }));
   }, []);
 
   const freeMin = settings?.freeDeliveryMin ?? 40;

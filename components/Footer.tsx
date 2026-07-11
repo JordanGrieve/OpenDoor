@@ -10,7 +10,7 @@ export default function Footer() {
         <div>
           <span style={{ font: "500 20px 'Playfair Display',serif", color: "#fbf3e6" }}>Open Door</span>
           <p style={{ font: "400 14px/1.7 Mulish", color: "#b3a18d", margin: "16px 0 0", maxWidth: 280 }}>
-            Handmade pastries and celebration boxes, baked fresh in Harrogate. Collection &amp; local delivery.
+            Handmade pastries and celebration boxes, baked fresh in Hamilton. Collection &amp; local delivery across Lanarkshire.
           </p>
         </div>
         <div>
@@ -38,7 +38,7 @@ export default function Footer() {
             Visit
           </div>
           <p style={{ font: "400 14px/1.7 Mulish", color: "#b3a18d", margin: 0 }}>
-            Montpellier Mews<br />Harrogate HG1<br />Tue–Sun, 8am–2pm
+            Hamilton, Glasgow<br />ML3 7PD<br />Collection Tue–Sun
           </p>
         </div>
       </div>

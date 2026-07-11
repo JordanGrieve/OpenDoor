@@ -16,8 +16,8 @@ function client(): Resend | null {
   return _resend;
 }
 
-const FROM = () => process.env.EMAIL_FROM || "Open Door Bakery <orders@thepastrybox.co.uk>";
-const REPLY_DOMAIN = () => process.env.EMAIL_REPLY_DOMAIN || "thepastrybox.co.uk";
+const FROM = () => process.env.EMAIL_FROM || "Open Door Bakery <orders@opendoorbakery.com>";
+const REPLY_DOMAIN = () => process.env.EMAIL_REPLY_DOMAIN || "opendoorbakery.com";
 
 /**
  * Reply-To for order emails. If EMAIL_REPLY_TO is set (e.g. a plain inbox

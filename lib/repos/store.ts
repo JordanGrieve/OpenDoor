@@ -12,7 +12,7 @@ export async function getDeliverySettings(): Promise<DeliverySettings> {
   `) as Row[];
   const r = rows[0];
   if (!r) {
-    return { deliveryFee: 4.5, freeDeliveryMin: 40, originPostcode: "HG1", radiusMiles: 8 };
+    return { deliveryFee: 4.5, freeDeliveryMin: 40, originPostcode: "ML3 7PD", radiusMiles: 8 };
   }
   return {
     deliveryFee: num(r.delivery_fee),
@@ -41,9 +41,15 @@ export async function getDeliveryPrefixes(): Promise<string[]> {
   return rows.map((r) => String(r.prefix).toUpperCase().replace(/\s+/g, ""));
 }
 
-/** Is a full postcode within the delivery area (prefix match)? */
+/**
+ * Is a full postcode within the delivery area? Matches on the outward code
+ * (district) exactly — the UK inward code is always the final 3 chars — so
+ * "ML3 7PD" → district "ML3". This correctly distinguishes ML1 from ML10/ML11.
+ */
 export async function isPostcodeDeliverable(postcode: string): Promise<boolean> {
   const normalized = postcode.toUpperCase().replace(/\s+/g, "");
-  const prefixes = await getDeliveryPrefixes();
-  return prefixes.some((p) => normalized.startsWith(p));
+  if (normalized.length < 5) return false; // not a full postcode
+  const outward = normalized.slice(0, -3);
+  const districts = await getDeliveryPrefixes();
+  return districts.includes(outward);
 }
