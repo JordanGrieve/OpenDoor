@@ -238,8 +238,9 @@ a {
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     gap: 14px;
-    margin: 0 -24px;
-    padding: 4px 24px 10px;
+    /* left edge stays aligned with content; only the right edge bleeds off */
+    margin: 0 -24px 0 0;
+    padding: 4px 24px 10px 0;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
   }
