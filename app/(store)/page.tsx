@@ -45,8 +45,22 @@ export default async function HomePage() {
           alignItems: "center",
           justifyContent: "center",
           position: "relative",
+          overflow: "hidden",
         }}
       >
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage:
+              "url('https://res.cloudinary.com/pvw2usoi/image/upload/f_auto,q_auto/open-door/hero-home')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            opacity: 0.4,
+            zIndex: 1,
+          }}
+        />
         <div style={{ position: "relative", zIndex: 2, maxWidth: 620, textAlign: "center" }}>
           <h1 style={{ font: "500 clamp(48px,7vw,72px)/1 'Playfair Display',serif", letterSpacing: "-.02em", color: "var(--ink)", margin: 0 }}>
             Welcome to
