@@ -53,10 +53,11 @@ export default function CartPage() {
               {items.map((i) => (
                 <div
                   key={`${i.variantId}-${i.notes ?? ""}`}
-                  style={{ display: "flex", gap: 16, alignItems: "center", padding: "20px 0", borderBottom: "1px solid var(--line)" }}
+                  className="cart-item"
+                  style={{ padding: "20px 0", borderBottom: "1px solid var(--line)" }}
                 >
                   <div className="sheen" style={{ width: 84, height: 84, borderRadius: 16, background: tileBackground(i.imageUrl, "Other"), flexShrink: 0, position: "relative", overflow: "hidden" }} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="cart-item-main" style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ font: "600 17px 'Playfair Display',serif", color: "var(--ink)" }}>
                       {i.name}
                       {i.variantLabel ? ` · ${i.variantLabel}` : ""}
@@ -68,15 +69,19 @@ export default function CartPage() {
                       </div>
                     )}
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", border: "1.5px solid var(--line)", borderRadius: 999, overflow: "hidden" }}>
-                    <button onClick={() => setQty(i.variantId, i.notes, i.quantity - 1)} className="btn" style={{ width: 36, height: 36, fontSize: 17, color: "var(--ink)", background: "none" }}>−</button>
-                    <span style={{ minWidth: 30, textAlign: "center", font: "600 15px Mulish", color: "var(--ink)" }}>{i.quantity}</span>
-                    <button onClick={() => setQty(i.variantId, i.notes, i.quantity + 1)} className="btn" style={{ width: 36, height: 36, fontSize: 17, color: "var(--ink)", background: "none" }}>+</button>
+                  <div className="cart-item-controls">
+                    <div style={{ display: "flex", alignItems: "center", border: "1.5px solid var(--line)", borderRadius: 999, overflow: "hidden", flexShrink: 0 }}>
+                      <button onClick={() => setQty(i.variantId, i.notes, i.quantity - 1)} className="btn" style={{ width: 36, height: 36, fontSize: 17, color: "var(--ink)", background: "none" }}>−</button>
+                      <span style={{ minWidth: 30, textAlign: "center", font: "600 15px Mulish", color: "var(--ink)" }}>{i.quantity}</span>
+                      <button onClick={() => setQty(i.variantId, i.notes, i.quantity + 1)} className="btn" style={{ width: 36, height: 36, fontSize: 17, color: "var(--ink)", background: "none" }}>+</button>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <div style={{ minWidth: 64, textAlign: "right", font: "600 17px 'Playfair Display',serif", color: "var(--ink)" }}>
+                        {formatGBP(i.price * i.quantity)}
+                      </div>
+                      <button onClick={() => remove(i.variantId, i.notes)} aria-label="Remove" className="btn" style={{ color: "var(--muted)", fontSize: 18, background: "none", flexShrink: 0 }}>×</button>
+                    </div>
                   </div>
-                  <div style={{ width: 74, textAlign: "right", font: "600 17px 'Playfair Display',serif", color: "var(--ink)" }}>
-                    {formatGBP(i.price * i.quantity)}
-                  </div>
-                  <button onClick={() => remove(i.variantId, i.notes)} aria-label="Remove" className="btn" style={{ color: "var(--muted)", fontSize: 18, background: "none" }}>×</button>
                 </div>
               ))}
             </div>
