@@ -66,9 +66,9 @@ export default function CustomPage() {
         </p>
       </div>
 
-      <div style={{ display: "flex", gap: 18, justifyContent: "center", flexWrap: "wrap", margin: "30px 0 40px" }}>
+      <div className="no-scrollbar assurance-row">
         {ASSURANCES.map((a) => (
-          <div key={a.text} className="card" style={{ display: "flex", alignItems: "center", gap: 9, borderRadius: 999, padding: "10px 18px" }}>
+          <div key={a.text} className="card" style={{ display: "flex", alignItems: "center", gap: 9, borderRadius: 999, padding: "10px 18px", flex: "0 0 auto", whiteSpace: "nowrap" }}>
             <span style={{ fontSize: 16 }}>{a.icon}</span>
             <span style={{ font: "600 13.5px Mulish", color: "var(--ink)" }}>{a.text}</span>
           </div>

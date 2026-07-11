@@ -273,6 +273,29 @@ a {
   }
 }
 
+/* Custom-order assurance chips: centered row on desktop, single
+   horizontal scroll line on mobile instead of stacking */
+.assurance-row {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 30px 0 40px;
+}
+@media (max-width: 768px) {
+  .assurance-row {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    touch-action: pan-x;
+    gap: 12px;
+    margin: 24px -24px 32px;
+    padding: 0 24px 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 /* Contact: form + info side-by-side, stacking on mobile */
 .contact-grid {
   display: grid;
