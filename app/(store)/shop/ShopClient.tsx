@@ -79,6 +79,8 @@ export default function ShopClient() {
           gap: 26,
           alignItems: "center",
           overflowX: "auto",
+          overflowY: "hidden",
+          touchAction: "pan-x",
           flexWrap: "nowrap",
           borderBottom: "1px solid var(--line)",
           marginBottom: 18,
