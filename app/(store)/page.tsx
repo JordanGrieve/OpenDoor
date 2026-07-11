@@ -136,7 +136,20 @@ export default async function HomePage() {
       {/* About */}
       <section style={{ background: "var(--cream-deep)", marginTop: 44 }}>
         <div className="wrap grid-2cols" style={{ padding: "80px 24px", alignItems: "center", gap: 54 }}>
-          <div style={{ position: "relative", aspectRatio: "4/5", borderRadius: 26, overflow: "hidden", background: "linear-gradient(150deg,#f1d0c9,#cf9a8f)", boxShadow: "0 30px 56px -30px rgba(120,80,40,.5)" }} className="sheen" />
+          <div
+            role="img"
+            aria-label="Emma, the baker behind Open Door"
+            style={{
+              position: "relative",
+              aspectRatio: "4/5",
+              borderRadius: 26,
+              overflow: "hidden",
+              background:
+                "#f1d0c9 center/cover no-repeat url('https://res.cloudinary.com/pvw2usoi/image/upload/f_auto,q_auto/open-door/emma-portrait')",
+              boxShadow: "0 30px 56px -30px rgba(120,80,40,.5)",
+            }}
+            className="sheen"
+          />
           <div>
             <span className="eyebrow">The hands behind the box</span>
             <h2 style={{ font: "500 clamp(30px,4vw,44px)/1.08 'Playfair Display',serif", color: "var(--ink)", margin: "12px 0 0" }}>
