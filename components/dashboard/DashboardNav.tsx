@@ -6,6 +6,7 @@ import SignOut from "@/components/dashboard/SignOut";
 const LINKS = [
   { href: "/dashboard", label: "Orders", exact: true },
   { href: "/dashboard/products", label: "Products" },
+  { href: "/dashboard/reviews", label: "Reviews" },
   { href: "/dashboard/stock", label: "Stock & shopping" },
   { href: "/dashboard/settings", label: "Settings" },
   { href: "/dashboard/analytics", label: "Analytics" },

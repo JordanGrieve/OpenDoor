@@ -178,6 +178,17 @@ export async function decrementStockForOrder(orderId: number) {
   `;
 }
 
+/** Remove abandoned checkouts: unpaid pending orders older than N hours. */
+export async function purgeStalePendingOrders(hours = 48): Promise<number> {
+  const res = (await sql`
+    DELETE FROM orders
+    WHERE status = 'pending'
+      AND stripe_payment_id IS NULL
+      AND created_at < now() - make_interval(hours => ${hours})
+  `) as unknown as { length?: number };
+  return Array.isArray(res) ? res.length : 0;
+}
+
 export async function updateOrderStatus(id: number, status: OrderStatus) {
   await sql`UPDATE orders SET status = ${status}, updated_at = now() WHERE id = ${id}`;
   return getOrderById(id);

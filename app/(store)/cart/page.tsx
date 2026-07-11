@@ -116,7 +116,7 @@ export default function CartPage() {
 
             {hasCelebration && (
               <p style={{ font: "400 12.5px/1.6 Mulish", color: "var(--muted)", margin: "14px 0 0", textAlign: "center" }}>
-                💛 Your box includes a celebration item — we&apos;ll confirm the details with you before taking payment.
+                💛 Your box includes a made-to-order item — after you order, we&apos;ll be in touch to confirm the details (flavour, message on the cake).
               </p>
             )}
             <p style={{ font: "400 12px/1.6 Mulish", color: "var(--muted)", margin: "12px 0 0", textAlign: "center" }}>

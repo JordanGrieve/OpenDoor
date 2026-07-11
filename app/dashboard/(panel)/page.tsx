@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { listOrders, type AdminOrder } from "@/lib/repos/orders";
+import { listOrders, purgeStalePendingOrders, type AdminOrder } from "@/lib/repos/orders";
 import { formatGBP } from "@/lib/money";
 import { prettyDate } from "@/lib/dates";
 import OrderActions from "@/components/dashboard/OrderActions";
@@ -21,6 +21,7 @@ export default async function OrderQueuePage({
   searchParams: Promise<{ view?: string }>;
 }) {
   const { view = "active" } = await searchParams;
+  await purgeStalePendingOrders().catch(() => {}); // tidy abandoned checkouts
   const all = await listOrders({});
   const filtered = all.filter(VIEWS[view] ?? VIEWS.active);
 

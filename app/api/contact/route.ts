@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sendEmail } from "@/lib/services/email";
+import { verifyTurnstile } from "@/lib/services/turnstile";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,8 @@ interface Intake {
   fulfilment?: string;
   // review
   rating?: number;
+  // anti-spam
+  turnstileToken?: string;
 }
 
 interface PostboxResult {
@@ -68,6 +71,15 @@ export async function POST(req: Request) {
   try {
     const data = (await req.json()) as Intake;
     const kind = data.kind || "contact";
+
+    // anti-spam: verify Turnstile on ticket-creating forms (no-ops when
+    // TURNSTILE_SECRET_KEY unset). Newsletter is fire-and-forget → exempt.
+    if (kind !== "newsletter") {
+      const humanOk = await verifyTurnstile(data.turnstileToken, req.headers.get("x-forwarded-for") || undefined);
+      if (!humanOk) {
+        return NextResponse.json({ error: "Anti-spam check failed. Please try again." }, { status: 403 });
+      }
+    }
 
     // Newsletter: email-only signup, not a ticket.
     if (kind === "newsletter") {

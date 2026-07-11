@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Turnstile from "@/components/store/Turnstile";
 
 interface Props {
   kind: "photo" | "review";
@@ -17,6 +18,7 @@ export default function ShareForm({ kind, buttonLabel, heading, blurb, messagePl
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
+  const [token, setToken] = useState("");
 
   const emailOk = (e: string) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e);
 
@@ -28,10 +30,11 @@ export default function ShareForm({ kind, buttonLabel, heading, blurb, messagePl
     if (!form.message.trim()) return setError("Please add a message.");
     setSending(true);
     try {
-      const res = await fetch("/api/contact", {
+      const endpoint = kind === "review" ? "/api/reviews" : "/api/contact";
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind, ...form, ...(withRating ? { rating } : {}) }),
+        body: JSON.stringify({ kind, ...form, turnstileToken: token, ...(withRating ? { rating } : {}) }),
       });
       if (res.ok) setDone(true);
       else {
@@ -84,6 +87,7 @@ export default function ShareForm({ kind, buttonLabel, heading, blurb, messagePl
         <input className="field" placeholder="you@email.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
         <textarea className="field" rows={4} placeholder={messagePlaceholder} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} style={{ resize: "vertical" }} />
       </div>
+      <Turnstile onVerify={setToken} />
       {error && <div className="field-error" style={{ marginTop: 10 }}>{error}</div>}
       <button type="submit" disabled={sending} className="btn btn-primary" style={{ width: "100%", marginTop: 14, padding: 14, fontSize: 15, borderRadius: 14, opacity: sending ? 0.7 : 1 }}>
         {sending ? "Sending…" : "Send"}

@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Turnstile from "@/components/store/Turnstile";
 
 const FAQS = [
   { q: "How does local delivery work?", a: "We deliver within about 8 miles of Hamilton — including Motherwell, Wishaw, Bellshill, Bothwell, Blantyre, Larkhall, Coatbridge and East Kilbride. Order before 4pm for next-day delivery, with a one-hour arrival window. Delivery is free over £40, otherwise £4.50." },
@@ -15,6 +16,7 @@ export default function ContactPage() {
   const [done, setDone] = useState(false);
   const [sending, setSending] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [token, setToken] = useState("");
 
   const emailOk = (e: string) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e);
 
@@ -33,7 +35,7 @@ export default function ContactPage() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind: "contact", ...form }),
+        body: JSON.stringify({ kind: "contact", ...form, turnstileToken: token }),
       });
       if (res.ok) {
         setDone(true);
@@ -83,8 +85,9 @@ export default function ContactPage() {
               <Field label="Message" error={errors.message}>
                 <textarea className="field" rows={5} placeholder="How can we help?" value={form.message} onChange={upd("message")} style={{ resize: "vertical" }} />
               </Field>
-              {submitError && <div className="field-error" style={{ marginBottom: 10 }}>{submitError}</div>}
-              <button type="submit" disabled={sending} className="btn btn-primary" style={{ width: "100%", padding: 15, fontSize: 15, borderRadius: 14, opacity: sending ? 0.7 : 1 }}>
+              <Turnstile onVerify={setToken} />
+              {submitError && <div className="field-error" style={{ margin: "10px 0" }}>{submitError}</div>}
+              <button type="submit" disabled={sending} className="btn btn-primary" style={{ width: "100%", marginTop: 12, padding: 15, fontSize: 15, borderRadius: 14, opacity: sending ? 0.7 : 1 }}>
                 {sending ? "Sending…" : "Send message"}
               </button>
             </form>

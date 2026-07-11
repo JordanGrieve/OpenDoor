@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getProductSummaries } from "@/lib/repos/products";
+import { listApprovedReviews } from "@/lib/repos/reviews";
 import ProductCard from "@/components/store/ProductCard";
 import Newsletter from "@/components/store/Newsletter";
 import ShareForm from "@/components/store/ShareForm";
@@ -16,6 +17,13 @@ const REVIEWS = [
 export default async function HomePage() {
   const products = await getProductSummaries();
   const best = products.slice(0, 3);
+
+  // Approved customer reviews (fall back to seed testimonials if none yet)
+  const approved = await listApprovedReviews(6);
+  const displayReviews =
+    approved.length > 0
+      ? approved.map((r) => ({ name: r.name, role: "Verified customer", text: r.body, stars: r.rating }))
+      : REVIEWS.map((r) => ({ ...r, stars: 5 }));
 
   // category cards with counts
   const categories = Array.from(new Set(products.map((p) => p.category)));
@@ -164,9 +172,9 @@ export default async function HomePage() {
             <h2 style={{ font: "500 36px/1 'Playfair Display',serif", color: "var(--ink)", margin: "8px 0 0" }}>What locals say</h2>
           </div>
           <div className="grid-3cols">
-            {REVIEWS.map((r) => (
+            {displayReviews.map((r) => (
               <div key={r.name} className="card" style={{ padding: 28 }}>
-                <div style={{ color: "var(--accent)", fontSize: 15, letterSpacing: 2 }}>★★★★★</div>
+                <div style={{ color: "var(--accent)", fontSize: 15, letterSpacing: 2 }}>{"★".repeat(r.stars)}{"☆".repeat(5 - r.stars)}</div>
                 <p style={{ font: "400 16px/1.7 'Playfair Display',serif", fontStyle: "italic", color: "var(--ink)", margin: "14px 0 0" }}>
                   “{r.text}”
                 </p>
