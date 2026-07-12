@@ -84,7 +84,7 @@ export default async function HomePage() {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 28, marginTop: 32 }}>
             <div style={{ textAlign: "center" }}>
               <div style={{ font: "600 24px 'Playfair Display',serif", color: "var(--ink)" }}>4.9 ★</div>
-              <div style={{ font: "500 13px Mulish", color: "var(--muted)" }}>600+ orders</div>
+              <div style={{ font: "500 13px Mulish", color: "var(--muted)" }}>5+ reviews</div>
             </div>
             <div style={{ width: 1, height: 40, background: "var(--line)" }} />
             <div style={{ textAlign: "center" }}>
