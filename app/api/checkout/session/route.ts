@@ -12,6 +12,7 @@ import {
   confirmOrderBySession,
 } from "@/lib/repos/orders";
 import { notifyOrderConfirmed } from "@/lib/services/notify";
+import { SELLING_ENABLED, PRELAUNCH_MESSAGE } from "@/lib/config";
 import type { CheckoutRequest } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +21,9 @@ const SITE = () => process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 const emailOk = (e: string) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e);
 
 export async function POST(req: Request) {
+  if (!SELLING_ENABLED) {
+    return NextResponse.json({ error: PRELAUNCH_MESSAGE }, { status: 503 });
+  }
   try {
     const body = (await req.json()) as CheckoutRequest;
 

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/components/cart/CartContext";
 import { formatGBP } from "@/lib/money";
 import { tileBackground } from "@/lib/theme";
+import { SELLING_ENABLED, PRELAUNCH_MESSAGE } from "@/lib/config";
 import type { DeliverySettings } from "@/lib/types";
 
 export default function CartPage() {
@@ -111,22 +112,35 @@ export default function CartPage() {
               <span>{formatGBP(total)}</span>
             </div>
 
-            <button
-              onClick={() => router.push(`/checkout?fulfilment=${fulfilment}`)}
-              className="btn btn-primary"
-              style={{ width: "100%", marginTop: 20, padding: 16, fontSize: 16, borderRadius: 14 }}
-            >
-              Checkout →
-            </button>
+            {SELLING_ENABLED ? (
+              <button
+                onClick={() => router.push(`/checkout?fulfilment=${fulfilment}`)}
+                className="btn btn-primary"
+                style={{ width: "100%", marginTop: 20, padding: 16, fontSize: 16, borderRadius: 14 }}
+              >
+                Checkout →
+              </button>
+            ) : (
+              <>
+                <button type="button" disabled className="btn btn-primary" style={{ width: "100%", marginTop: 20, padding: 16, fontSize: 16, borderRadius: 14, opacity: 0.5, cursor: "not-allowed" }}>
+                  Coming soon
+                </button>
+                <p style={{ font: "500 13px/1.6 Mulish", color: "var(--accent-deep)", margin: "12px 0 0", textAlign: "center" }}>
+                  {PRELAUNCH_MESSAGE}
+                </p>
+              </>
+            )}
 
-            {hasCelebration && (
+            {SELLING_ENABLED && hasCelebration && (
               <p style={{ font: "400 12.5px/1.6 Mulish", color: "var(--muted)", margin: "14px 0 0", textAlign: "center" }}>
                 💛 Your box includes a made-to-order item — after you order, we&apos;ll be in touch to confirm the details (flavour, message on the cake).
               </p>
             )}
-            <p style={{ font: "400 12px/1.6 Mulish", color: "var(--muted)", margin: "12px 0 0", textAlign: "center" }}>
-              Secure Stripe checkout · your card details never touch our servers.
-            </p>
+            {SELLING_ENABLED && (
+              <p style={{ font: "400 12px/1.6 Mulish", color: "var(--muted)", margin: "12px 0 0", textAlign: "center" }}>
+                Secure Stripe checkout · your card details never touch our servers.
+              </p>
+            )}
           </div>
         </div>
       )}

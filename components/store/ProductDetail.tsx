@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Product } from "@/lib/types";
 import { formatGBP } from "@/lib/money";
 import { DEFAULT_DELIVERY_INFO, DEFAULT_STORAGE_INFO } from "@/lib/product-copy";
+import { SELLING_ENABLED, PRELAUNCH_MESSAGE } from "@/lib/config";
 import ProductPhoto from "@/components/store/ProductPhoto";
 import { useCart } from "@/components/cart/CartContext";
 
@@ -134,16 +135,27 @@ export default function ProductDetail({ product }: { product: Product }) {
           )}
 
           {/* qty + add */}
-          <div style={{ display: "flex", alignItems: "center", gap: 16, margin: "26px 0 0" }}>
-            <div style={{ display: "flex", alignItems: "center", border: "1.5px solid var(--line)", borderRadius: 999, overflow: "hidden", background: "var(--card)" }}>
-              <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="btn" style={{ width: 46, height: 46, fontSize: 20, color: "var(--ink)", background: "none" }}>−</button>
-              <span style={{ minWidth: 40, textAlign: "center", font: "600 17px Mulish", color: "var(--ink)" }}>{qty}</span>
-              <button onClick={() => setQty((q) => q + 1)} className="btn" style={{ width: 46, height: 46, fontSize: 20, color: "var(--ink)", background: "none" }}>+</button>
+          {SELLING_ENABLED ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 16, margin: "26px 0 0" }}>
+              <div style={{ display: "flex", alignItems: "center", border: "1.5px solid var(--line)", borderRadius: 999, overflow: "hidden", background: "var(--card)" }}>
+                <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="btn" style={{ width: 46, height: 46, fontSize: 20, color: "var(--ink)", background: "none" }}>−</button>
+                <span style={{ minWidth: 40, textAlign: "center", font: "600 17px Mulish", color: "var(--ink)" }}>{qty}</span>
+                <button onClick={() => setQty((q) => q + 1)} className="btn" style={{ width: 46, height: 46, fontSize: 20, color: "var(--ink)", background: "none" }}>+</button>
+              </div>
+              <button onClick={onAdd} className="btn btn-primary" style={{ flex: 1, padding: "15px 28px", fontSize: 15 }}>
+                Add to Cart · {formatGBP(price * qty)}
+              </button>
             </div>
-            <button onClick={onAdd} className="btn btn-primary" style={{ flex: 1, padding: "15px 28px", fontSize: 15 }}>
-              Add to Cart · {formatGBP(price * qty)}
-            </button>
-          </div>
+          ) : (
+            <div style={{ margin: "26px 0 0" }}>
+              <button type="button" disabled className="btn btn-primary" style={{ width: "100%", padding: "15px 28px", fontSize: 15, opacity: 0.5, cursor: "not-allowed" }}>
+                Coming soon
+              </button>
+              <p style={{ font: "500 13.5px/1.6 Mulish", color: "var(--accent-deep)", margin: "12px 0 0", textAlign: "center" }}>
+                {PRELAUNCH_MESSAGE}
+              </p>
+            </div>
+          )}
 
           {/* personalise for celebration items */}
           {product.celebration && (
