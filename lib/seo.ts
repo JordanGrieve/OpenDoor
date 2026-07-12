@@ -1,5 +1,6 @@
 // Structured-data (JSON-LD) builders for local SEO + generative engines.
 import type { Product } from "@/lib/types";
+import { SELLING_ENABLED } from "@/lib/config";
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://opendoorbakery.com";
 
@@ -62,7 +63,9 @@ export function productJsonLd(product: Product) {
       "@type": "Offer",
       priceCurrency: "GBP",
       price: product.price.toFixed(2),
-      availability: "https://schema.org/InStock",
+      availability: SELLING_ENABLED
+        ? "https://schema.org/InStock"
+        : "https://schema.org/PreOrder",
       url: `${SITE}/products/${product.slug}`,
       seller: { "@type": "Organization", name: BUSINESS.name },
     },

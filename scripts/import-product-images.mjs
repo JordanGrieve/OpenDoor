@@ -70,7 +70,10 @@ async function main() {
     if (dryRun) { console.log(`•  ${file} → ${prod.name} (pos ${position})`); ok++; continue; }
 
     try {
-      const res = await cloudinary.uploader.upload(join(dir, file), { folder: "open-door" });
+      const publicId = position > 0
+        ? `open-door/products/${slug}-${position + 1}`
+        : `open-door/products/${slug}`;
+      const res = await cloudinary.uploader.upload(join(dir, file), { public_id: publicId, overwrite: true });
       const url = cloudinary.url(res.public_id, { fetch_format: "auto", quality: "auto", secure: true });
       await client.query(
         "INSERT INTO product_images (product_id, cloudflare_id, url, alt, position) VALUES ($1,$2,$3,$4,$5)",

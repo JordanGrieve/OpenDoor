@@ -25,6 +25,13 @@ export default async function HomePage() {
       ? approved.map((r) => ({ name: r.name, role: "Verified customer", text: r.body, stars: r.rating }))
       : REVIEWS.map((r) => ({ ...r, stars: 5 }));
 
+  // Hero credibility stat — only claim a rating when real reviews exist.
+  const reviewCount = approved.length;
+  const avgRating =
+    reviewCount > 0
+      ? (approved.reduce((t, r) => t + r.rating, 0) / reviewCount).toFixed(1)
+      : null;
+
   // category cards with counts
   const categories = Array.from(new Set(products.map((p) => p.category)));
   const categoryCards = categories.slice(0, 8).map((cat) => {
@@ -82,10 +89,19 @@ export default async function HomePage() {
             </Link>
           </div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 28, marginTop: 32 }}>
-            <div style={{ textAlign: "center" }}>
-              <div style={{ font: "600 24px 'Playfair Display',serif", color: "var(--ink)" }}>4.9 ★</div>
-              <div style={{ font: "500 13px Mulish", color: "var(--muted)" }}>5+ reviews</div>
-            </div>
+            {avgRating ? (
+              <div style={{ textAlign: "center" }}>
+                <div style={{ font: "600 24px 'Playfair Display',serif", color: "var(--ink)" }}>{avgRating} ★</div>
+                <div style={{ font: "500 13px Mulish", color: "var(--muted)" }}>
+                  {reviewCount} review{reviewCount === 1 ? "" : "s"}
+                </div>
+              </div>
+            ) : (
+              <div style={{ textAlign: "center" }}>
+                <div style={{ font: "600 24px 'Playfair Display',serif", color: "var(--ink)" }}>Hamilton</div>
+                <div style={{ font: "500 13px Mulish", color: "var(--muted)" }}>collection &amp; delivery</div>
+              </div>
+            )}
             <div style={{ width: 1, height: 40, background: "var(--line)" }} />
             <div style={{ textAlign: "center" }}>
               <div style={{ font: "600 24px 'Playfair Display',serif", color: "var(--ink)" }}>Baked daily</div>

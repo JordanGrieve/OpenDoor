@@ -18,9 +18,12 @@ export async function generateMetadata({
   return {
     title: product.metaTitle || product.name,
     description: product.metaDescription || product.description.slice(0, 155),
+    alternates: { canonical: `/products/${product.slug}` },
     openGraph: {
+      type: "website",
       title: product.metaTitle || product.name,
       description: product.metaDescription || product.description.slice(0, 155),
+      url: `/products/${product.slug}`,
       images: product.images[0]?.url ? [product.images[0].url] : undefined,
     },
   };
