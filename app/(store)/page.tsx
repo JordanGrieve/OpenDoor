@@ -8,22 +8,18 @@ import { tileBackground } from "@/lib/theme";
 
 export const dynamic = "force-dynamic";
 
-const REVIEWS = [
-  { name: "Hannah W.", role: "Hamilton", text: "The celebration box for my mum's birthday was unreal. Beautifully boxed and tasted even better than it looked." },
-  { name: "Tom & Priya", role: "Collected weekly", text: "We get the morning pastry box most Saturdays now. The almond croissants alone are worth the trip." },
-  { name: "Sarah J.", role: "Local delivery", text: "Emma made a dessert table for our wedding and it stole the show. So thoughtful, so generous, so good." },
-];
-
 export default async function HomePage() {
   const products = await getProductSummaries();
   const best = products.slice(0, 3);
 
-  // Approved customer reviews (fall back to seed testimonials if none yet)
+  // Only ever show real, approved customer reviews — never placeholder copy.
   const approved = await listApprovedReviews(6);
-  const displayReviews =
-    approved.length > 0
-      ? approved.map((r) => ({ name: r.name, role: "Verified customer", text: r.body, stars: r.rating }))
-      : REVIEWS.map((r) => ({ ...r, stars: 5 }));
+  const displayReviews = approved.map((r) => ({
+    name: r.name,
+    role: "Verified customer",
+    text: r.body,
+    stars: r.rating,
+  }));
 
   // Hero credibility stat — only claim a rating when real reviews exist.
   const reviewCount = approved.length;
@@ -141,8 +137,8 @@ export default async function HomePage() {
       {/* Bestsellers */}
       <section className="wrap" style={{ padding: "44px 24px" }}>
         <div style={{ textAlign: "center", marginBottom: 34 }}>
-          <span className="eyebrow">Loved by locals</span>
-          <h2 style={{ font: "500 36px/1 'Playfair Display',serif", color: "var(--ink)", margin: "8px 0 0" }}>Bestselling boxes</h2>
+          <span className="eyebrow">Fresh from the counter</span>
+          <h2 style={{ font: "500 36px/1 'Playfair Display',serif", color: "var(--ink)", margin: "8px 0 0" }}>Emma&apos;s favourites</h2>
         </div>
         <div className="row-carousel cols-3">
           {best.map((p) => (
@@ -214,23 +210,33 @@ export default async function HomePage() {
         <div className="wrap sec-pad-lg">
           <div style={{ textAlign: "center", marginBottom: 34 }}>
             <span className="eyebrow">Kind words</span>
-            <h2 style={{ font: "500 36px/1 'Playfair Display',serif", color: "var(--ink)", margin: "8px 0 0" }}>What locals say</h2>
+            <h2 style={{ font: "500 36px/1 'Playfair Display',serif", color: "var(--ink)", margin: "8px 0 0" }}>
+              {displayReviews.length > 0 ? "What locals say" : "Be our first review"}
+            </h2>
+            {displayReviews.length === 0 && (
+              <p style={{ font: "400 16px/1.7 Mulish", color: "#6c5a4a", margin: "12px auto 0", maxWidth: 520 }}>
+                We&apos;re just opening our doors, so there&apos;s nothing here yet. Once you&apos;ve tried
+                something, we&apos;d love you to tell everyone how it went.
+              </p>
+            )}
           </div>
-          <div className="row-carousel cols-3">
-            {displayReviews.map((r) => (
-              <div key={r.name} className="card" style={{ padding: 28 }}>
-                <div style={{ color: "var(--accent)", fontSize: 15, letterSpacing: 2 }}>{"★".repeat(r.stars)}{"☆".repeat(5 - r.stars)}</div>
-                <p style={{ font: "400 16px/1.7 'Playfair Display',serif", fontStyle: "italic", color: "var(--ink)", margin: "14px 0 0" }}>
-                  “{r.text}”
-                </p>
-                <div style={{ marginTop: 18 }}>
-                  <div style={{ font: "600 14px Mulish", color: "var(--ink)" }}>{r.name}</div>
-                  <div style={{ font: "500 12px Mulish", color: "var(--muted)" }}>{r.role}</div>
+          {displayReviews.length > 0 && (
+            <div className="row-carousel cols-3">
+              {displayReviews.map((r) => (
+                <div key={r.name} className="card" style={{ padding: 28 }}>
+                  <div style={{ color: "var(--accent)", fontSize: 15, letterSpacing: 2 }}>{"★".repeat(r.stars)}{"☆".repeat(5 - r.stars)}</div>
+                  <p style={{ font: "400 16px/1.7 'Playfair Display',serif", fontStyle: "italic", color: "var(--ink)", margin: "14px 0 0" }}>
+                    “{r.text}”
+                  </p>
+                  <div style={{ marginTop: 18 }}>
+                    <div style={{ font: "600 14px Mulish", color: "var(--ink)" }}>{r.name}</div>
+                    <div style={{ font: "500 12px Mulish", color: "var(--muted)" }}>{r.role}</div>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-          <div style={{ textAlign: "center", marginTop: 30 }}>
+              ))}
+            </div>
+          )}
+          <div style={{ textAlign: "center", marginTop: displayReviews.length > 0 ? 30 : 0 }}>
             <ShareForm
               kind="review"
               withRating
