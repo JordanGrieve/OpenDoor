@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { sendEmail } from "@/lib/services/email";
 import { verifyTurnstile } from "@/lib/services/turnstile";
+import { rateLimitGuard } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -68,6 +69,8 @@ function customMessage(d: Intake): string {
 }
 
 export async function POST(req: Request) {
+  const limited = rateLimitGuard(req, "contact", "You've sent a few messages already — please wait a moment before sending another.");
+  if (limited) return limited;
   try {
     const data = (await req.json()) as Intake;
     const kind = data.kind || "contact";

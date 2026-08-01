@@ -13,6 +13,7 @@ import {
 } from "@/lib/repos/orders";
 import { notifyOrderConfirmed } from "@/lib/services/notify";
 import { SELLING_ENABLED, PRELAUNCH_MESSAGE } from "@/lib/config";
+import { rateLimitGuard } from "@/lib/rate-limit";
 import type { CheckoutRequest } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -24,6 +25,8 @@ export async function POST(req: Request) {
   if (!SELLING_ENABLED) {
     return NextResponse.json({ error: PRELAUNCH_MESSAGE }, { status: 503 });
   }
+  const limited = rateLimitGuard(req, "checkout", "Too many checkout attempts — please wait a moment and try again.");
+  if (limited) return limited;
   try {
     const body = (await req.json()) as CheckoutRequest;
 

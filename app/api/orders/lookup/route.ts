@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
 import { getOrderByNumberAndEmail } from "@/lib/repos/orders";
 import { isCancellable } from "@/lib/orders-policy";
+import { rateLimitGuard } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
 // GET /api/orders/lookup?number=ORD-0084&email=...
 // Guest order lookup — requires BOTH the order number and matching email.
+// Rate limited: this is the one read endpoint that's an enumeration surface.
 export async function GET(req: Request) {
+  const limited = rateLimitGuard(req, "orderLookup", "Too many lookups — please wait a moment and try again.");
+  if (limited) return limited;
   try {
     const { searchParams } = new URL(req.url);
     const number = searchParams.get("number") ?? "";

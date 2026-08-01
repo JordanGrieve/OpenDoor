@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { createReview } from "@/lib/repos/reviews";
 import { verifyTurnstile } from "@/lib/services/turnstile";
+import { rateLimitGuard } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
 // POST /api/reviews — customer submits a review (stored pending moderation)
 export async function POST(req: Request) {
+  const limited = rateLimitGuard(req, "reviews", "You've sent a few reviews already — please try again later.");
+  if (limited) return limited;
   try {
     const data = (await req.json()) as {
       name?: string;
