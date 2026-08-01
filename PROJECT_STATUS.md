@@ -8,7 +8,9 @@ Open Door Bakery is an online-only artisan bakery platform for a Hamilton (Scotl
 
 ## Where we are now
 
-The product works end-to-end and is deployed. Recent effort has been a wave of mobile-UI polish, an honesty/SEO clean-up, and a full state audit. Today's session purged test data, reorganised the Cloudinary bucket, fixed SEO defects, and switched the store into pre-launch mode. What stands between "built" and "selling" is now mostly **owner/ops work** (Clerk production instance, Vercel env verification, Google Business Profile) plus a pricing review — not code.
+The product works end-to-end and is deployed. A later session on 2026-08-01 worked the engineering backlog down to zero: the project now has an **automated test suite (90 tests)**, **API rate limiting**, **collection-slot capacity limits**, no **fabricated social proof**, and an **accurate README**. Everything remaining is either an owner/ops action (Clerk production instance, Vercel env vars, Google Business Profile, Search Console) or needs a business decision from Jordan (pricing, one product photo).
+
+Two hazards were surfaced along the way and are *not* yet fixed: local development points at the **production database**, and the app runs a **Next.js version with 8 high-severity advisories**. Both are described under Risks.
 
 ## Completed
 
@@ -28,29 +30,46 @@ The product works end-to-end and is deployed. Recent effort has been a wave of m
 - **SEO fixes (today)**: fixed doubled `"| Open Door Bakery"` in product titles; JSON-LD availability now `PreOrder` while pre-launch; honest hero stat (real review data, not fabricated numbers).
 - **Ops**: deployed to Vercel (auto-deploy from `main`), Cloudflare DNS, domain live.
 
+### Completed 2026-08-01 (engineering backlog)
+
+- **Automated test suite** (`0f23a11`) — Vitest, `npm test`, 90 tests across money/pence rounding, fulfilment dates, postcode districts, product-input normalisation, SEO JSON-LD, rate limiting and slot capacity. Proven non-vacuous by a mutation check.
+- **Fabricated social proof removed** (`01d56f8`) — the three invented testimonials are gone; the section shows only real approved reviews, with an honest empty state otherwise. "Bestselling boxes" (zero orders ever) became "Emma's favourites".
+- **API rate limiting** (`a8d25cf`) — `lib/rate-limit.ts` guards contact, reviews, checkout and order-lookup with per-endpoint budgets and `429 + Retry-After`.
+- **Collection-slot capacity** (`f24c11c`) — migration 0004 adds nullable `capacity`; availability derives from live orders (cancelled/refunded release their place); enforced **server-side** at checkout; editable per slot in the dashboard; full slots shown disabled with "Fully booked" / "N places left".
+- **README rewritten** (`335f05c`) — corrected Cloudflare Images → Cloudinary, Clerk's actual role (admin gating, not customer accounts), Twilio's real state (implemented but unconfigured), and removed stale "in progress" markers.
+
 ## In progress
 
-- **Launch prep** — flipping from pre-launch to selling (blocked on the items below).
-- **Pricing review** — owner flagged that some product prices "may be weird"; needs a pass before selling.
-- **Product imagery** — most products have photos; Birthday Treat Box has none, and gallery/secondary images are sparse.
+_Nothing actively in progress — the code queue is empty. The items below need a decision or an action from Jordan._
 
 ## Remaining work
 
-- **Clerk production instance** — currently running on a **development** instance in production (redirects to `*.accounts.dev`). Needs a prod instance + DNS + `pk_live_/sk_live_` in Vercel.
-- **Verify Vercel env vars** — `EMAIL_FROM` (should be `orders@opendoorbakery.com`, local still `resend.dev`), `STRIPE_WEBHOOK_SECRET` (local is a 2-char placeholder), `STRIPE_SECRET_KEY` (live), and confirm `EMAIL_REPLY_DOMAIN` (`thepastrybox.co.uk`?) is intentional.
+**Needs a decision from Jordan**
+- **Pricing review** — analysis done and posted to Asana. Chief suspect: **Lemon Drizzle Loaf at £4.00**, which is cheaper than a single almond croissant and far below market for a whole loaf (either the price or the name is wrong). Also: celebration box variants don't state size/servings, and bulk discounts vary 8.3–10.7%. **Blocked** on Jordan's prices.
+- **Product imagery** — 11 of 12 products have a photo; **Birthday Treat Box has none**. The only unused stock image is branded "L'ARTISAN BAKERY" so it cannot be used. **Blocked** on a photo file.
+
+**Owner/ops actions**
+- **Clerk production instance** — production still runs a **development** instance (redirects to `*.accounts.dev`). Needs prod instance + DNS + `pk_live_/sk_live_` in Vercel.
+- **Verify Vercel env vars** — `EMAIL_FROM`, `STRIPE_WEBHOOK_SECRET` (local is a 2-char placeholder), live `STRIPE_SECRET_KEY`, and whether `EMAIL_REPLY_DOMAIN` (`thepastrybox.co.uk`) is intentional.
 - **Google Business Profile** — not created; the single biggest factor for ranking on "hamilton bakery".
 - **Google Search Console** — verify domain, submit sitemap.
-- **Replace/hide fake testimonials** — the "What locals say" section still shows 3 fabricated named reviews.
-- **Confirm business facts** — verify the map pin (lat 55.76005 / lon -4.038857) lands on 18 Avonbank; confirm `hello@opendoorbakery.com` is a monitored inbox; add a real phone number and opening hours.
-- **Pre-launch → live Stripe test** — one real card order + refund before opening.
-- **Deferred features** — automated tests, rate limiting, collection-slot capacity limits.
+- **Confirm business facts** — verify the map pin (lat 55.76005 / lon -4.038857) lands on 18 Avonbank; confirm `hello@opendoorbakery.com` is monitored; add a phone number and opening hours.
+- **Live Stripe test order + refund** before opening.
+
+**Newly identified engineering work (not started)**
+- **Stop local dev writing to production** — see Risks; needs a Neon dev branch or an unset `DATABASE_URL`.
+- **Next.js security upgrade** — 8 high-severity advisories; needs a deliberate, tested upgrade.
+- **Ingredient costs** — `ingredients` has no cost column, so margins can't be computed; this is what makes pricing guesswork.
 
 ## Blockers
 
 - **Clerk is on a dev instance in production** — the main auth blocker for a clean launch.
 - **Production env values can't be verified from the code** — needs the owner to confirm in Vercel.
 - **Selling intentionally disabled** until pricing is reviewed (self-imposed, correct).
+- **Pricing decisions** — can't be made without Jordan, and can't be made *well* without ingredient costs.
+- **Birthday Treat Box photo** — needs a real image file.
 - **Google Business Profile / Search Console are owner actions** and not started — GEO ranking can't begin without them.
+- **Local dev writes to production** — structural hazard, see Risks.
 
 ## Successes
 
@@ -59,6 +78,8 @@ The product works end-to-end and is deployed. Recent effort has been a wave of m
 - **Robust drawer animation fix**: the preview/background browser tab pauses CSS animations *and* `requestAnimationFrame`; switching the menu mount-transition to `setTimeout` fixed a genuinely subtle bug.
 - **Solid auth architecture**: Clerk + allowlist + signed-cookie fast-path, with a password fallback — well factored.
 - **Clean data + green types**: no orphaned rows, TypeScript passes throughout, and every change this session was verified live in a real browser rather than assumed.
+- **The engineering backlog is now empty** (2026-08-01): tests, rate limiting, slot capacity, the testimonials fix and the README all landed in one pass, each verified against a running server or the real schema rather than accepted on a green typecheck.
+- **Capacity enforcement is honest**: booked counts derive from live orders instead of a counter column, so they cannot drift; and the rule is re-checked server-side at checkout rather than trusting the UI.
 
 ## Failures & lessons learned
 
@@ -67,13 +88,22 @@ The product works end-to-end and is deployed. Recent effort has been a wave of m
 - **Animation approach thrash**: CSS `@keyframes` then `requestAnimationFrame` both failed for the drawer (background-tab throttling) before `setTimeout` worked.
 - **Tooling false alarms**: a build-chunk scan wrongly reported Turnstile as "not bundled" — a regex that excluded the `()` in App Router route-group paths. Lesson: verify the tool before trusting the conclusion.
 - **Cloudinary disorganisation**: images were first uploaded with random public IDs and mixed with demo assets; had to be reorganised into `products/<slug>` and cleaned up.
-- **Honesty defects shipped then fixed**: seed data double-branded the meta titles (title-tag bug), and the hero advertised a fabricated "4.9 ★ / 600+ orders" — both corrected; fake testimonials still remain.
+- **Honesty defects shipped then fixed**: seed data double-branded the meta titles (title-tag bug), the hero advertised a fabricated "4.9 ★ / 600+ orders", and the homepage carried three invented testimonials plus a "Bestselling boxes" heading on a shop with zero orders. All now corrected — the pattern was placeholder marketing copy quietly becoming a factual claim once the site went live.
+- **Testing on production data** (2026-08-01): a live rate-limit burst wrote rows to the production `reviews` table because local dev points at prod. Caught and cleaned up immediately, and later verification work was redesigned to use rolled-back transactions and far-future sentinel dates instead. Lesson: check *where* a dev server is pointed before exercising write endpoints against it.
+- **A wrong conclusion from a shallow grep**: Twilio was initially recorded as "not wired up" after grepping only a couple of directories. It is in fact fully implemented and called from the notification service — it simply has no credentials configured. Corrected before it reached the README.
 
 ## Risks & other notes
 
-- **No automated tests** — all verification is manual/browser-based; regressions could slip in silently.
-- **Stale README** — mentions Cloudflare Images, Twilio SMS, and a "password-protected" dashboard (it's Clerk now); worth refreshing before handover.
+**Newly surfaced 2026-08-01 — both still open**
+
+- **Local development reads and writes the PRODUCTION database.** `.env.local` sets `DATABASE_URL` to the live Neon database, so `npm run dev` mutates real data. This bit during testing: a rate-limit burst inserted 6 rows into the live `reviews` table (spotted, verified and deleted; they were `pending` so never public). The app already ships the right mechanism — an embedded PGlite sandbox that engages when `DATABASE_URL` is unset. Fix by pointing local at a Neon branch, or unsetting the variable. Risk grows sharply once real customer orders exist.
+- **Next.js has 8 high-severity advisories** (`npm audit`) — DoS via Server Actions, SSRF in rewrites, cache confusion, unauthenticated disclosure of internal Server Function endpoints, plus vulnerable `postcss`/`sharp` transitives. Not upgraded here: `npm audit fix` wants a framework bump, which shouldn't happen unattended on a live site. Should be a deliberate, tested upgrade before taking payments.
+- **No ingredient cost data.** `ingredients` tracks name/unit/category/stock but no cost, so gross margin per product is uncomputable. Pricing is currently guesswork.
+
+**Ongoing**
+
+- **Test coverage is unit-only** — 90 tests cover pure logic well, but there is no browser/e2e suite; UI regressions still rely on manual checks.
+- **Rate limiting is per-instance** — in-process counters, so on Vercel the limit is per serverless instance, not global. Deliberate trade-off, documented in the module.
 - **Pricing not finalised** — a launch blocker and a trust risk if opened prematurely.
-- **Fake testimonials live** — an honesty/consumer-law risk until replaced with real reviews or hidden.
 - **Public street address in schema** — needed for local SEO but may be a home address; a privacy consideration.
-- **Single-maintainer, pre-launch project** with a soft ~September deadline; most remaining work is ops/setup, not engineering.
+- **Single-maintainer, pre-launch project** with a soft ~September deadline; the engineering queue is now clear, so remaining work is ops/setup and business decisions.
