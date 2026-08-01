@@ -42,14 +42,28 @@ export async function getDeliveryPrefixes(): Promise<string[]> {
 }
 
 /**
+ * Outward code (district) of a full UK postcode, or null if it isn't one.
+ * The inward code is always the final 3 chars, so "ML3 7PD" → "ML3".
+ * Pure + exported so it can be unit tested without a database.
+ */
+export function postcodeDistrict(postcode: string): string | null {
+  const normalized = String(postcode ?? "").toUpperCase().replace(/\s+/g, "");
+  if (normalized.length < 5) return null; // not a full postcode
+  return normalized.slice(0, -3);
+}
+
+/** Pure district match — the logic behind isPostcodeDeliverable. */
+export function isPostcodeInDistricts(postcode: string, districts: string[]): boolean {
+  const outward = postcodeDistrict(postcode);
+  if (!outward) return false;
+  return districts.includes(outward);
+}
+
+/**
  * Is a full postcode within the delivery area? Matches on the outward code
- * (district) exactly — the UK inward code is always the final 3 chars — so
- * "ML3 7PD" → district "ML3". This correctly distinguishes ML1 from ML10/ML11.
+ * (district) exactly, so this correctly distinguishes ML1 from ML10/ML11.
  */
 export async function isPostcodeDeliverable(postcode: string): Promise<boolean> {
-  const normalized = postcode.toUpperCase().replace(/\s+/g, "");
-  if (normalized.length < 5) return false; // not a full postcode
-  const outward = normalized.slice(0, -3);
   const districts = await getDeliveryPrefixes();
-  return districts.includes(outward);
+  return isPostcodeInDistricts(postcode, districts);
 }
