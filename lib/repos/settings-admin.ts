@@ -25,6 +25,10 @@ export async function addSlot(slotTime: string, label: string) {
 export async function setSlotActive(id: number, active: boolean) {
   await sql`UPDATE collection_slots SET active = ${active} WHERE id = ${id}`;
 }
+/** capacity null = unlimited places in this slot. */
+export async function setSlotCapacity(id: number, capacity: number | null) {
+  await sql`UPDATE collection_slots SET capacity = ${capacity} WHERE id = ${id}`;
+}
 export async function removeSlot(id: number) {
   await sql`DELETE FROM collection_slots WHERE id = ${id}`;
 }

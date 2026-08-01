@@ -38,6 +38,16 @@ export default function SettingsPage() {
     await fetch(`/api/admin/slots/${s.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ active: !s.active }) });
     load();
   };
+  // Blank = unlimited. Update locally first so typing stays responsive.
+  const setSlotCapacity = async (s: CollectionSlot, raw: string) => {
+    const capacity = raw.trim() === "" ? null : Math.max(0, Math.floor(Number(raw) || 0));
+    setSlots((cur) => cur.map((x) => (x.id === s.id ? { ...x, capacity } : x)));
+    await fetch(`/api/admin/slots/${s.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ capacity }),
+    });
+  };
   const removeSlot = async (id: number) => {
     await fetch(`/api/admin/slots/${id}`, { method: "DELETE" });
     load();
@@ -83,6 +93,16 @@ export default function SettingsPage() {
             <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 0", borderBottom: "1px solid var(--line)" }}>
               <span style={{ font: "600 13px Mulish", color: "var(--muted)", width: 60 }}>{s.slotTime}</span>
               <span style={{ font: "500 14px Mulish", color: "var(--ink)", flex: 1 }}>{s.label}</span>
+              <input
+                type="number"
+                min={0}
+                className="field"
+                title="Orders allowed in this slot per day — leave blank for unlimited"
+                placeholder="∞"
+                value={s.capacity ?? ""}
+                onChange={(e) => setSlotCapacity(s, e.target.value)}
+                style={{ width: 78, padding: "6px 10px", textAlign: "center" }}
+              />
               <button onClick={() => toggleSlot(s)} className="btn" style={{ background: "none", border: "1.5px solid var(--line)", borderRadius: 999, padding: "5px 12px", font: "600 12px Mulish", color: s.active ? "#4a6b3a" : "var(--muted)" }}>
                 {s.active ? "Active" : "Off"}
               </button>

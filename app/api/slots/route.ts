@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
-import { getCollectionSlots } from "@/lib/repos/store";
+import { getCollectionSlots, getSlotAvailability } from "@/lib/repos/store";
 
 export const dynamic = "force-dynamic";
 
-// GET /api/slots?date=YYYY-MM-DD — available collection slots for a date.
-// (Slots are the same each day; the date param lets us later exclude
-//  fully-booked slots per day.)
+// GET /api/slots?date=YYYY-MM-DD — collection slots for a date. With a date
+// each slot also carries its live booking count, so full ones can be shown
+// as unavailable rather than silently disappearing.
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const date = searchParams.get("date");
-    const slots = await getCollectionSlots(true);
+    const slots = date ? await getSlotAvailability(date) : await getCollectionSlots(true);
     return NextResponse.json({ date, slots });
   } catch (err) {
     console.error("[api/slots]", err);

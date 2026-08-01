@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useCart } from "@/components/cart/CartContext";
 import { formatGBP } from "@/lib/money";
 import { fulfilmentDateOptions, prettyDate } from "@/lib/dates";
-import type { CollectionSlot, DeliverySettings } from "@/lib/types";
+import type { DeliverySettings, SlotAvailability } from "@/lib/types";
 
 export default function CheckoutClient() {
   const { items, subtotal, longestLeadTime, hasCelebration, clear, ready } = useCart();
@@ -15,7 +15,7 @@ export default function CheckoutClient() {
     params.get("fulfilment") === "delivery" ? "delivery" : "collection"
   );
   const [settings, setSettings] = useState<DeliverySettings | null>(null);
-  const [slots, setSlots] = useState<CollectionSlot[]>([]);
+  const [slots, setSlots] = useState<SlotAvailability[]>([]);
 
   const dateOptions = useMemo(() => fulfilmentDateOptions(longestLeadTime, 14), [longestLeadTime]);
   const [date, setDate] = useState("");
@@ -40,7 +40,12 @@ export default function CheckoutClient() {
     if (fulfilment !== "collection" || !date) return;
     fetch(`/api/slots?date=${date}`)
       .then((r) => r.json())
-      .then((d) => setSlots(d.slots ?? []))
+      .then((d) => {
+        const next: SlotAvailability[] = d.slots ?? [];
+        setSlots(next);
+        // Don't leave a now-full slot selected (e.g. after changing date).
+        setSlotId((cur) => (cur && next.some((s) => s.id === cur && s.full) ? null : cur));
+      })
       .catch(() => setSlots([]));
   }, [fulfilment, date]);
 
@@ -138,22 +143,37 @@ export default function CheckoutClient() {
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                   {slots.map((s) => {
                     const on = slotId === s.id;
+                    const full = Boolean(s.full);
                     return (
                       <button
                         key={s.id}
                         type="button"
-                        onClick={() => setSlotId(s.id)}
+                        disabled={full}
+                        title={full ? "This collection time is fully booked" : undefined}
+                        onClick={() => !full && setSlotId(s.id)}
                         className="btn"
                         style={{
                           border: `1.5px solid ${on ? "var(--accent)" : "var(--line)"}`,
                           background: on ? "var(--blush-soft)" : "var(--card)",
-                          color: "var(--ink)",
+                          color: full ? "var(--muted)" : "var(--ink)",
                           padding: "10px 14px",
                           borderRadius: 12,
                           font: "600 13px Mulish",
+                          opacity: full ? 0.55 : 1,
+                          cursor: full ? "not-allowed" : "pointer",
+                          textDecoration: full ? "line-through" : "none",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "flex-start",
+                          gap: 2,
                         }}
                       >
-                        {s.label}
+                        <span>{s.label}</span>
+                        {s.notice && (
+                          <span style={{ font: "600 10.5px Mulish", color: full ? "var(--muted)" : "var(--accent-deep)", textDecoration: "none" }}>
+                            {s.notice}
+                          </span>
+                        )}
                       </button>
                     );
                   })}

@@ -1,13 +1,21 @@
 import { NextResponse } from "next/server";
-import { removeSlot, setSlotActive } from "@/lib/repos/settings-admin";
+import { removeSlot, setSlotActive, setSlotCapacity } from "@/lib/repos/settings-admin";
+import { parseCapacity } from "@/lib/slot-capacity";
 
 export const dynamic = "force-dynamic";
 
-// PATCH /api/admin/slots/:id  { active }
+// PATCH /api/admin/slots/:id  { active?, capacity? }
+// capacity: a number, or null/"" for unlimited.
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const { active } = (await req.json()) as { active: boolean };
-  await setSlotActive(Number(id), Boolean(active));
+  const body = (await req.json()) as { active?: boolean; capacity?: unknown };
+
+  if ("capacity" in body) {
+    await setSlotCapacity(Number(id), parseCapacity(body.capacity));
+  }
+  if (typeof body.active === "boolean") {
+    await setSlotActive(Number(id), body.active);
+  }
   return NextResponse.json({ ok: true });
 }
 

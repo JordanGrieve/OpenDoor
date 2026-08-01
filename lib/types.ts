@@ -92,6 +92,18 @@ export interface CollectionSlot {
   label: string;
   active: boolean;
   sortOrder: number;
+  /** Places available per day. null = unlimited. */
+  capacity: number | null;
+}
+
+/** A slot with its live booking count for a specific date. */
+export interface SlotAvailability extends CollectionSlot {
+  booked: number;
+  /** Places left, or null when unlimited. */
+  remaining: number | null;
+  full: boolean;
+  /** Short label like "2 places left", or null when there's nothing to say. */
+  notice: string | null;
 }
 
 export interface DeliverySettings {

@@ -1,7 +1,8 @@
 // Settings, collection slots and delivery postcode data access.
 import { sql } from "@/lib/db";
 import { num } from "@/lib/money";
-import type { CollectionSlot, DeliverySettings } from "@/lib/types";
+import { placesRemaining, isSlotFull, capacityLabel } from "@/lib/slot-capacity";
+import type { CollectionSlot, DeliverySettings, SlotAvailability } from "@/lib/types";
 
 type Row = Record<string, unknown>;
 
@@ -26,13 +27,73 @@ export async function getCollectionSlots(activeOnly = true): Promise<CollectionS
   const rows = (activeOnly
     ? ((await sql`SELECT * FROM collection_slots WHERE active = TRUE ORDER BY sort_order, slot_time`) as Row[])
     : ((await sql`SELECT * FROM collection_slots ORDER BY sort_order, slot_time`) as Row[]));
-  return rows.map((r) => ({
+  return rows.map(mapSlot);
+}
+
+function mapSlot(r: Row): CollectionSlot {
+  return {
     id: Number(r.id),
     slotTime: String(r.slot_time),
     label: String(r.label),
     active: Boolean(r.active),
     sortOrder: Number(r.sort_order),
-  }));
+    capacity: r.capacity === null || r.capacity === undefined ? null : Number(r.capacity),
+  };
+}
+
+/**
+ * Active slots for a date, each with how many places are already taken.
+ * Booked counts come straight from live orders, so they can't drift out
+ * of sync with reality. Cancelled/refunded orders release their place.
+ */
+export async function getSlotAvailability(date: string): Promise<SlotAvailability[]> {
+  const rows = (await sql`
+    SELECT s.*,
+      (SELECT count(*) FROM orders o
+        WHERE o.collection_slot_id = s.id
+          AND o.fulfilment_date = ${date}
+          AND o.status NOT IN ('cancelled', 'refunded')
+      ) AS booked
+    FROM collection_slots s
+    WHERE s.active = TRUE
+    ORDER BY s.sort_order, s.slot_time
+  `) as Row[];
+
+  return rows.map((r) => {
+    const slot = mapSlot(r);
+    const booked = Number(r.booked ?? 0);
+    const input = { capacity: slot.capacity, booked };
+    return {
+      ...slot,
+      booked,
+      remaining: placesRemaining(input),
+      full: isSlotFull(input),
+      notice: capacityLabel(input),
+    };
+  });
+}
+
+/**
+ * Server-side capacity check used at checkout. Returns true only if the
+ * slot is active and still has room on that date.
+ */
+export async function isSlotBookable(slotId: number, date: string): Promise<boolean> {
+  const rows = (await sql`
+    SELECT s.capacity,
+      (SELECT count(*) FROM orders o
+        WHERE o.collection_slot_id = s.id
+          AND o.fulfilment_date = ${date}
+          AND o.status NOT IN ('cancelled', 'refunded')
+      ) AS booked
+    FROM collection_slots s
+    WHERE s.id = ${slotId} AND s.active = TRUE
+    LIMIT 1
+  `) as Row[];
+
+  const r = rows[0];
+  if (!r) return false; // missing or inactive
+  const capacity = r.capacity === null || r.capacity === undefined ? null : Number(r.capacity);
+  return !isSlotFull({ capacity, booked: Number(r.booked ?? 0) });
 }
 
 /** Returns the list of active postcode prefixes (uppercased, no spaces). */

@@ -3,7 +3,7 @@ import { sql } from "@/lib/db";
 import { toPence } from "@/lib/money";
 import { earliestFulfilmentDate } from "@/lib/dates";
 import { getStripe } from "@/lib/services/stripe";
-import { isPostcodeDeliverable } from "@/lib/repos/store";
+import { isPostcodeDeliverable, isSlotBookable } from "@/lib/repos/store";
 import {
   priceCheckout,
   computeDeliveryFee,
@@ -56,6 +56,11 @@ export async function POST(req: Request) {
         SELECT id FROM collection_slots WHERE id = ${body.collectionSlotId} AND active = TRUE LIMIT 1
       `) as { id: number }[];
       if (!slot[0]) return bad("That collection slot is no longer available.");
+      // Re-check capacity server-side: the storefront hides full slots, but
+      // two customers can submit at once and a client check is bypassable.
+      if (!(await isSlotBookable(Number(slot[0].id), body.fulfilmentDate))) {
+        return bad("Sorry — that collection time has just filled up. Please pick another.");
+      }
       collectionSlotId = Number(slot[0].id);
     } else {
       deliveryAddress = body.deliveryAddress?.trim() || null;
