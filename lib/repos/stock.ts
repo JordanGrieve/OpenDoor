@@ -8,6 +8,11 @@ export async function adjustIngredientStock(id: number, stock: number) {
   await sql`UPDATE ingredients SET stock = ${stock} WHERE id = ${id}`;
 }
 
+/** cost null = not yet entered; margins then report as unknown. */
+export async function setIngredientCost(id: number, costPerUnit: number | null) {
+  await sql`UPDATE ingredients SET cost_per_unit = ${costPerUnit} WHERE id = ${id}`;
+}
+
 export interface ShoppingLine {
   id: number;
   name: string;

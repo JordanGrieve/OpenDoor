@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getProductById } from "@/lib/repos/products";
-import { updateProduct, archiveProduct, getProductRecipes } from "@/lib/repos/products-admin";
+import { updateProduct, archiveProduct, getProductRecipes, getProductMargins } from "@/lib/repos/products-admin";
 import { normalizeProductInput, friendlyProductError } from "@/lib/product-input";
 import type { ProductInput } from "@/lib/repos/products-admin";
 
@@ -12,7 +12,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const product = await getProductById(Number(id));
   if (!product) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const recipes = await getProductRecipes(product.id);
-  return NextResponse.json({ product, recipes });
+  const margins = await getProductMargins(product.id);
+  return NextResponse.json({ product, recipes, margins });
 }
 
 // PUT /api/admin/products/:id — update

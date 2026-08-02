@@ -22,12 +22,16 @@ export default async function StockPage() {
         {/* Ingredient stock */}
         <div className="card" style={{ padding: 24 }}>
           <h2 style={{ font: "500 18px 'Playfair Display',serif", color: "var(--ink)", margin: "0 0 8px" }}>Ingredient stock</h2>
-          <p style={{ font: "400 12.5px Mulish", color: "var(--muted)", margin: "0 0 12px" }}>Edit a value and click away to save.</p>
+          <p style={{ font: "400 12.5px Mulish", color: "var(--muted)", margin: "0 0 12px" }}>
+            Edit a value and click away to save. The second box is <b>cost per unit</b> — fill these in and
+            each product shows its true cost and margin. Leave one blank if you don&apos;t know it yet:
+            that product&apos;s margin reads &ldquo;unknown&rdquo; rather than quietly looking better than it is.
+          </p>
           {[...byCat.entries()].map(([cat, items]) => (
             <div key={cat} style={{ marginBottom: 14 }}>
               <div style={{ font: "600 11px Mulish", letterSpacing: ".06em", textTransform: "uppercase", color: "var(--accent-deep)", marginBottom: 4 }}>{cat}</div>
               {items.map((i) => (
-                <IngredientRow key={i.id} id={i.id} name={i.name} unit={i.unit} category={i.category} stock={i.stock} />
+                <IngredientRow key={i.id} id={i.id} name={i.name} unit={i.unit} category={i.category} stock={i.stock} costPerUnit={i.costPerUnit} />
               ))}
             </div>
           ))}

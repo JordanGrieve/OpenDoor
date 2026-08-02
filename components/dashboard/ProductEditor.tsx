@@ -4,6 +4,9 @@ import { useRouter } from "next/navigation";
 import type { Allergen, Ingredient, Product } from "@/lib/types";
 import { prettyDate } from "@/lib/dates";
 import { DEFAULT_DELIVERY_INFO, DEFAULT_STORAGE_INFO } from "@/lib/product-copy";
+import { marginHealth, marginHealthLabel } from "@/lib/margin";
+import { formatGBP } from "@/lib/money";
+import type { VariantMargin } from "@/lib/types";
 
 interface RecipeRow { ingredientId: number; amount: number }
 interface VariantRow { id?: number; label: string; price: number; stockLimit: number | null; recipe: RecipeRow[] }
@@ -34,6 +37,7 @@ export default function ProductEditor({ mode, productId }: { mode: "new" | "edit
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [images, setImages] = useState<ImageRow[]>([]);
   const [days, setDays] = useState<DayRow[]>([]);
+  const [margins, setMargins] = useState<VariantMargin[]>([]);
 
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -77,6 +81,7 @@ export default function ProductEditor({ mode, productId }: { mode: "new" | "edit
         p.variants.map((v) => ({ id: v.id, label: v.label, price: v.price, stockLimit: v.stockLimit, recipe: recipes[v.id] ?? [] }))
       );
         setImages(p.images.map((i) => ({ id: i.id, url: i.url })));
+        setMargins(pRes.margins ?? []);
         setDays(aRes.days ?? []);
       } finally {
         setLoaded(true);
@@ -268,6 +273,45 @@ export default function ProductEditor({ mode, productId }: { mode: "new" | "edit
           + Add variant
         </button>
       </Card>
+
+      {/* Cost & margin — edit only, derived from recipes + ingredient costs */}
+      {mode === "edit" && margins.length > 0 && (
+        <Card title="Cost & margin">
+          <p style={{ font: "400 12.5px/1.6 Mulish", color: "var(--muted)", margin: "0 0 14px" }}>
+            Ingredient cost per variant, worked out from the recipes above and the unit costs on the{" "}
+            <a href="/dashboard/stock" style={{ color: "var(--accent-deep)", textDecoration: "underline" }}>Stock</a>{" "}
+            page. This is ingredients only — labour, packaging, energy and delivery still come out of the margin.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {margins.map((m) => {
+              const health = marginHealth(m.marginPct);
+              const colour =
+                health === "loss" ? "var(--danger)"
+                : health === "thin" ? "#b5762f"
+                : health === "unknown" ? "var(--muted)"
+                : "#4a6b3a";
+              return (
+                <div key={m.variantId} style={{ display: "grid", gridTemplateColumns: "1fr auto auto auto", gap: 12, alignItems: "center", padding: "10px 0", borderBottom: "1px solid var(--line)" }}>
+                  <span style={{ font: "600 14px Mulish", color: "var(--ink)" }}>{m.label}</span>
+                  <span style={{ font: "500 13px Mulish", color: "var(--muted)" }}>{formatGBP(m.price)}</span>
+                  <span style={{ font: "500 13px Mulish", color: "var(--muted)", minWidth: 96, textAlign: "right" }}>
+                    {m.cost === null ? "cost unknown" : `costs ${formatGBP(m.cost)}`}
+                  </span>
+                  <span style={{ font: "700 13px Mulish", color: colour, minWidth: 132, textAlign: "right" }}>
+                    {m.marginPct === null ? marginHealthLabel(health) : `${m.marginPct}% · ${marginHealthLabel(health)}`}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          {margins.some((m) => !m.costComplete) && (
+            <p style={{ font: "500 12.5px/1.6 Mulish", color: "var(--accent-deep)", background: "var(--blush-soft)", padding: "10px 12px", borderRadius: 10, marginTop: 12 }}>
+              Some ingredients still have no cost, so those variants show &ldquo;cost unknown&rdquo; rather than a
+              figure that would look better than reality. Add the missing costs on the Stock page to see real margins.
+            </p>
+          )}
+        </Card>
+      )}
 
       {/* SEO */}
       <Card title="SEO">

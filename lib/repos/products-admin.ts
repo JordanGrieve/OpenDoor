@@ -6,7 +6,8 @@ import { sql } from "@/lib/db";
 import { num } from "@/lib/money";
 import { isoDate } from "@/lib/dates";
 import { getProductById } from "@/lib/repos/products";
-import type { Ingredient, Product } from "@/lib/types";
+import { variantCost, grossMarginPct, grossProfit, type RecipeLine } from "@/lib/margin";
+import type { Ingredient, Product, VariantMargin } from "@/lib/types";
 
 type Row = Record<string, unknown>;
 
@@ -202,7 +203,54 @@ export async function listIngredients(): Promise<Ingredient[]> {
     unit: String(r.unit),
     category: String(r.category),
     stock: num(r.stock),
+    costPerUnit: r.cost_per_unit === null || r.cost_per_unit === undefined ? null : num(r.cost_per_unit),
   }));
+}
+
+/**
+ * Cost + margin per variant for a product, derived from the recipes and
+ * ingredient unit costs. A variant whose recipe has any ingredient
+ * without a cost reports cost: null (see lib/margin.ts for why).
+ */
+export async function getProductMargins(productId: number): Promise<VariantMargin[]> {
+  const rows = (await sql`
+    SELECT v.id, v.label, v.price,
+           ri.amount, i.cost_per_unit
+    FROM product_variants v
+    LEFT JOIN recipe_items ri ON ri.variant_id = v.id
+    LEFT JOIN ingredients i ON i.id = ri.ingredient_id
+    WHERE v.product_id = ${productId}
+    ORDER BY v.sort_order
+  `) as Row[];
+
+  const byVariant = new Map<number, { label: string; price: number; lines: RecipeLine[] }>();
+  for (const r of rows) {
+    const id = Number(r.id);
+    if (!byVariant.has(id)) {
+      byVariant.set(id, { label: String(r.label), price: num(r.price), lines: [] });
+    }
+    // A LEFT JOIN with no recipe rows yields a single row with null amount.
+    if (r.amount !== null && r.amount !== undefined) {
+      byVariant.get(id)!.lines.push({
+        amount: num(r.amount),
+        costPerUnit: r.cost_per_unit === null || r.cost_per_unit === undefined ? null : num(r.cost_per_unit),
+      });
+    }
+  }
+
+  return [...byVariant.entries()].map(([variantId, v]) => {
+    const c = variantCost(v.lines);
+    return {
+      variantId,
+      label: v.label,
+      price: v.price,
+      cost: c.cost,
+      costComplete: c.complete,
+      missingCosts: c.missing,
+      marginPct: grossMarginPct(v.price, c.cost),
+      profit: grossProfit(v.price, c.cost),
+    };
+  });
 }
 
 /** Recipe rows for a product's variants (for the editor). */

@@ -119,6 +119,22 @@ export interface Ingredient {
   unit: string;
   category: string;
   stock: number;
+  /** Cost per unit. null = not yet entered (margins show as unknown). */
+  costPerUnit: number | null;
+}
+
+/** Cost + margin for one product variant, derived from its recipe. */
+export interface VariantMargin {
+  variantId: number;
+  label: string;
+  price: number;
+  /** null when any ingredient in the recipe has no cost entered. */
+  cost: number | null;
+  costComplete: boolean;
+  /** Ingredients in this recipe still missing a cost. */
+  missingCosts: number;
+  marginPct: number | null;
+  profit: number | null;
 }
 
 export interface OrderItem {
