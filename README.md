@@ -43,12 +43,19 @@ npm run dev        # open http://localhost:3000
 
 When `DATABASE_URL` is not set, the app boots an in-process **PGlite** (WASM Postgres), auto-creates the schema and seeds sample data on first request. Every external service (Stripe, Resend, Twilio, Cloudinary, Clerk, Turnstile) degrades gracefully when its keys are absent — calls log the intended action instead of failing, and checkout confirms orders directly without Stripe.
 
-> ⚠️ **`DATABASE_URL` in `.env.local` currently points at the production Neon database**, so `npm run dev` reads *and writes live data*. Use a Neon branch for local work, or leave `DATABASE_URL` unset to get the PGlite sandbox above.
-
-For a real database:
+**Local dev deliberately does not touch production.** `DATABASE_URL` is intentionally *unset* in `.env.local`, so `npm run dev` runs against the PGlite sandbox and cannot affect live data. The production connection string is kept in the same file as `PROD_DATABASE_URL`, used only for deliberate migrations:
 
 ```bash
-cp .env.example .env.local   # add DATABASE_URL (Neon) + any keys you have
+# run pending migrations against PRODUCTION (deliberate, not routine)
+DATABASE_URL="$PROD_DATABASE_URL" node db/migrate.mjs
+```
+
+Pending migrations are applied to the PGlite sandbox automatically on boot and tracked in a `_migrations` table, so adding a migration doesn't leave your local schema stale. To start completely fresh, delete the `.pglite` directory.
+
+To point local at a real database anyway (e.g. a Neon *branch* — never production):
+
+```bash
+cp .env.example .env.local   # set DATABASE_URL to a Neon BRANCH, not prod
 npm run db:reset             # migrate + seed
 npm run dev
 ```

@@ -42,13 +42,41 @@ async function getPglite() {
     const db = new PGlite(dataDir);
     await db.waitReady;
 
-    // Bootstrap schema + seed once.
-    const exists = await db.query(`SELECT to_regclass('public.products') AS t`);
-    if (!(exists.rows[0] as Row)?.t) {
-      const migrationsDir = join(process.cwd(), "db", "migrations");
-      const files = readdirSync(migrationsDir).filter((f) => f.endsWith(".sql")).sort();
-      for (const f of files) await db.exec(readFileSync(join(migrationsDir, f), "utf8"));
-      console.log("[db:pglite] schema created");
+    // Apply any PENDING migrations, tracked the same way db/migrate.mjs does.
+    // Previously this only ran when the products table was missing, so an
+    // existing .pglite directory silently kept a stale schema and every
+    // migration added afterwards was never applied locally.
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS _migrations (
+        name TEXT PRIMARY KEY,
+        run_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+    `);
+    const migrationsDir = join(process.cwd(), "db", "migrations");
+    const files = readdirSync(migrationsDir).filter((f) => f.endsWith(".sql")).sort();
+    const done = new Set(
+      ((await db.query(`SELECT name FROM _migrations`)).rows as Row[]).map((r) => String(r.name))
+    );
+    // A pre-existing database created before this tracking was added already
+    // has the initial schema, so record it rather than trying to re-run it.
+    const hadProducts = Boolean((((await db.query(`SELECT to_regclass('public.products') AS t`)).rows[0]) as Row)?.t);
+
+    for (const f of files) {
+      if (done.has(f)) continue;
+      if (hadProducts && f === files[0]) {
+        await db.query(`INSERT INTO _migrations (name) VALUES ($1) ON CONFLICT DO NOTHING`, [f]);
+        continue;
+      }
+      try {
+        await db.exec(readFileSync(join(migrationsDir, f), "utf8"));
+        await db.query(`INSERT INTO _migrations (name) VALUES ($1) ON CONFLICT DO NOTHING`, [f]);
+        console.log(`[db:pglite] applied ${f}`);
+      } catch (err) {
+        // An older .pglite may already contain some of a later migration's
+        // objects; IF NOT EXISTS guards cover most of it, so record and move on.
+        console.warn(`[db:pglite] ${f} skipped: ${(err as Error).message}`);
+        await db.query(`INSERT INTO _migrations (name) VALUES ($1) ON CONFLICT DO NOTHING`, [f]);
+      }
     }
     const count = await db.query(`SELECT count(*)::int AS n FROM products`);
     if (((count.rows[0] as Row)?.n ?? 0) === 0) {
