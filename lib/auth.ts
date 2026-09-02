@@ -14,8 +14,13 @@ function secret(): string {
 export function adminPassword(): string {
   return process.env.ADMIN_PASSWORD || "opendoor";
 }
+/** Shared preview password for the site-wide lock. Never the admin password. */
+export function sitePassword(): string {
+  return process.env.SITE_PASSWORD || "opendoor-preview";
+}
 
 const TOKEN_MESSAGE = "od-admin-session-v1";
+const LOCK_TOKEN_MESSAGE = "od-site-lock-v1";
 
 function toHex(buf: ArrayBuffer): string {
   return Array.from(new Uint8Array(buf))
@@ -50,12 +55,27 @@ export async function adminVerifiedToken(userId: string): Promise<string> {
   return hmac(`admin-verified:${userId}`);
 }
 
-/** Constant-time-ish validation of a presented cookie token. */
-export async function isValidSession(token: string | undefined | null): Promise<boolean> {
-  if (!token) return false;
-  const expected = await sessionToken();
+/** The signed value stored in the lock cookie once the site password is entered. */
+export async function lockToken(): Promise<string> {
+  return hmac(LOCK_TOKEN_MESSAGE);
+}
+
+/** Constant-time-ish comparison, so a wrong token can't be timed out character by character. */
+function matches(token: string, expected: string): boolean {
   if (token.length !== expected.length) return false;
   let diff = 0;
   for (let i = 0; i < expected.length; i++) diff |= token.charCodeAt(i) ^ expected.charCodeAt(i);
   return diff === 0;
+}
+
+/** Constant-time-ish validation of a presented cookie token. */
+export async function isValidSession(token: string | undefined | null): Promise<boolean> {
+  if (!token) return false;
+  return matches(token, await sessionToken());
+}
+
+/** Validation of the site-lock cookie. Grants storefront access only. */
+export async function isValidLockSession(token: string | undefined | null): Promise<boolean> {
+  if (!token) return false;
+  return matches(token, await lockToken());
 }

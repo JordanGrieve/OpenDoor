@@ -95,6 +95,8 @@ export const LIMITS = {
   checkout: { limit: 10, windowMs: 10 * 60_000 },
   /** Order lookup is an enumeration surface, so keep it tighter. */
   orderLookup: { limit: 10, windowMs: 5 * 60_000 },
+  /** Site-lock password attempts — the only brake on guessing it. */
+  lock: { limit: 10, windowMs: 10 * 60_000 },
 } as const satisfies Record<string, RateLimitRule>;
 
 /**

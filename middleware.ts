@@ -1,6 +1,8 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse, type NextRequest, type NextFetchEvent } from "next/server";
 import { clerkMiddleware, createRouteMatcher, clerkClient } from "@clerk/nextjs/server";
-import { SESSION_COOKIE, isValidSession, adminVerifiedToken } from "@/lib/auth";
+import { SESSION_COOKIE, isValidSession, isValidLockSession, adminVerifiedToken } from "@/lib/auth";
+import { LOCK_COOKIE, isLockExempt } from "@/lib/site-lock";
+import { SITE_LOCKED } from "@/lib/config";
 
 const clerkEnabled = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
 const allowedEmails = (process.env.ADMIN_ALLOWED_EMAILS || "")
@@ -78,9 +80,42 @@ async function passwordGuard(req: NextRequest): Promise<Response> {
   return NextResponse.next();
 }
 
-export default clerkEnabled ? withClerk : passwordGuard;
+// ── Site-wide lock: everything public sits behind /lock ──
+// Runs before the admin logic and never touches it: the dashboard has
+// its own (stronger) auth, so it is exempt rather than doubly gated.
+async function lockGuard(req: NextRequest): Promise<Response | null> {
+  if (!SITE_LOCKED) return null;
+  const { pathname } = req.nextUrl;
 
-// Only run on the admin surface — the storefront is entirely Clerk-free.
+  const unlocked = await isValidLockSession(req.cookies.get(LOCK_COOKIE)?.value);
+
+  // Already unlocked and still sitting on the lock screen → send them in.
+  if (pathname === "/lock" && unlocked) {
+    return NextResponse.redirect(new URL("/", req.url));
+  }
+  if (isLockExempt(pathname) || unlocked) return null;
+
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.json({ error: "This site isn't open yet." }, { status: 503 });
+  }
+  const url = new URL("/lock", req.url);
+  if (pathname !== "/") url.searchParams.set("from", pathname);
+  return NextResponse.redirect(url);
+}
+
+export default async function middleware(req: NextRequest, event: NextFetchEvent) {
+  // The admin surface is exempt from the lock — it authenticates separately.
+  if (!isAdminArea(req)) {
+    const locked = await lockGuard(req);
+    if (locked) return locked;
+    return NextResponse.next();
+  }
+  // Storefront stays entirely Clerk-free: only the admin surface reaches here.
+  return clerkEnabled ? withClerk(req, event) : passwordGuard(req);
+}
+
+// Matches everything except framework assets, so the lock can cover the
+// whole site. Admin routing inside is unchanged.
 export const config = {
-  matcher: ["/dashboard/:path*", "/api/admin/:path*"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
