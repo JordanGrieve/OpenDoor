@@ -22,7 +22,15 @@ const EXEMPT_PREFIXES = [
   "/_next", // framework assets
 ];
 
-const EXEMPT_EXACT = ["/robots.txt", "/sitemap.xml", "/favicon.ico"];
+const EXEMPT_EXACT = [
+  "/robots.txt",
+  "/sitemap.xml",
+  // Icons: the browser tab and search results should still show the mark
+  // while the site is locked, so these must not redirect to /lock.
+  "/favicon.ico",
+  "/icon.svg",
+  "/apple-icon.png",
+];
 
 /** True when a path must remain reachable with no lock session. */
 export function isLockExempt(pathname: string): boolean {

@@ -21,6 +21,12 @@ describe("isLockExempt", () => {
     expect(isLockExempt("/sitemap.xml")).toBe(true);
   });
 
+  it("allows the favicon and app icons through, so the tab mark still renders", () => {
+    expect(isLockExempt("/favicon.ico")).toBe(true);
+    expect(isLockExempt("/icon.svg")).toBe(true);
+    expect(isLockExempt("/apple-icon.png")).toBe(true);
+  });
+
   it("locks the storefront", () => {
     expect(isLockExempt("/")).toBe(false);
     expect(isLockExempt("/shop")).toBe(false);
