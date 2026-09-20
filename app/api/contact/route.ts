@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { sendEmail } from "@/lib/services/email";
 import { verifyTurnstile } from "@/lib/services/turnstile";
+import { createTicket } from "@/lib/services/postbox";
 import { rateLimitGuard } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
@@ -9,9 +10,6 @@ export const dynamic = "force-dynamic";
 // Isolated intake for the contact form, custom-order enquiries and newsletter.
 // Contact + custom enquiries become support tickets in Postbox; newsletter
 // signups (email only) still just notify the owner by email.
-const POSTBOX_URL = () =>
-  process.env.POSTBOX_TICKET_URL ||
-  "https://postbox.help/api/tickets/cli_c34f25ddd727e0350cb2e700351f7929";
 const OWNER_EMAIL = () => process.env.OWNER_EMAIL || process.env.EMAIL_FROM || "hello@opendoorbakery.com";
 
 interface Intake {
@@ -29,31 +27,6 @@ interface Intake {
   rating?: number;
   // anti-spam
   turnstileToken?: string;
-}
-
-interface PostboxResult {
-  status: number;
-  ticketId?: number;
-  error?: string;
-}
-
-async function createTicket(payload: { name: string; email: string; message: string; subject?: string }): Promise<PostboxResult> {
-  try {
-    const res = await fetch(POSTBOX_URL(), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const json = (await res.json().catch(() => ({}))) as {
-      ok?: boolean;
-      error?: string;
-      ticket?: { id?: number };
-    };
-    return { status: res.status, ticketId: json.ticket?.id, error: json.error };
-  } catch (err) {
-    console.error("[api/contact] Postbox request failed", err);
-    return { status: 0, error: (err as Error).message };
-  }
 }
 
 /** Build a readable ticket body for a custom-order enquiry. */
@@ -121,17 +94,27 @@ export async function POST(req: Request) {
 
     const result = await createTicket(payload);
 
-    if (result.status === 201) {
-      return NextResponse.json({ ok: true, ticketId: result.ticketId });
+    switch (result.kind) {
+      case "created":
+        return NextResponse.json({ ok: true, ticketId: result.ticketId });
+      case "skipped":
+        // Not configured (local dev). Degrade like the app's other services
+        // rather than showing the customer an error we caused ourselves.
+        return NextResponse.json({ ok: true, delivered: false });
+      case "invalid":
+        return NextResponse.json({ error: result.error || "Please check your details." }, { status: 400 });
+      case "rate-limited":
+        return NextResponse.json(
+          { error: "We're getting a lot of messages right now — please try again in a moment." },
+          { status: 429 }
+        );
+      default:
+        // The status and body have already been logged by the service.
+        return NextResponse.json(
+          { error: "Couldn't send your message — please try again shortly." },
+          { status: 502 }
+        );
     }
-    if (result.status === 400) {
-      return NextResponse.json({ error: result.error || "Please check your details." }, { status: 400 });
-    }
-    if (result.status === 429) {
-      return NextResponse.json({ error: "We're getting a lot of messages right now — please try again in a moment." }, { status: 429 });
-    }
-    // network error or unexpected status
-    return NextResponse.json({ error: "Couldn't send your message — please try again shortly." }, { status: 502 });
   } catch (err) {
     console.error("[api/contact]", err);
     return NextResponse.json({ error: "Failed to send" }, { status: 500 });
